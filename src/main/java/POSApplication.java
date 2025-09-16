@@ -1,0 +1,2 @@
+public class POSApplication {
+}
