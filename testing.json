@@ -1,0 +1,18 @@
+{
+  "user_register": [
+    {
+      "userEmail":"nyinyimyintmyat.work@gmail.com",
+      "userName":"Nyi Nyi",
+      "password":"helloworld",
+      "role":"ADMIN",
+      "permissions":["READ"]
+    },
+    {
+      "userEmail":"nyinyimyintmyat.work@gmail.com",
+      "userName":"Nyi Nyi",
+      "password":"helloworld",
+      "role":"ADMIN",
+      "permissions":["READ"]
+    }
+  ]
+}

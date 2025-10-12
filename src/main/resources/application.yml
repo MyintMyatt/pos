@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: pos
+  security:
+    user:
+      name: orion
+      password: hello
+  config:
+    import: vault://
+  cloud:
+    vault:
+      uri: http://127.0.0.1:8200
+      token: root
+      kv:
+        enabled: true
+        backend: secret
+        default-context: pos-secret
+        config:
+          lifecycle:
+            enabled: true
+
+  datasource:
+    url: ${db-url}
+    username: ${db-username}
+    password: ${db-password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+
+
+default:
+  user:
+    profile:
+      image: https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png
