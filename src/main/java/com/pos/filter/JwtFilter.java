@@ -1,7 +1,7 @@
 package com.pos.filter;
 
 import com.pos.common.service.JwtService;
-import com.pos.features.user.service.SecurityUserDetailService;
+import com.pos.features.super_admin.user.service.SecurityUserDetailService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
