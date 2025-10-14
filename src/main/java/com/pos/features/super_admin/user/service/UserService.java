@@ -1,13 +1,13 @@
-package com.pos.features.user.service;
+package com.pos.features.super_admin.user.service;
 
 import com.pos.common.service.JwtService;
 import com.pos.exception.UserAlreadyExitedException;
 import com.pos.exception.UserNotFoundException;
-import com.pos.features.user.model.entity.User;
-import com.pos.features.user.model.request.LoginUserRequest;
-import com.pos.features.user.model.request.UserRequest;
-import com.pos.features.user.model.response.UserResponse;
-import com.pos.features.user.repo.UserRepo;
+import com.pos.features.super_admin.user.model.entity.User;
+import com.pos.features.super_admin.user.model.request.LoginUserRequest;
+import com.pos.features.super_admin.user.model.request.UserRequest;
+import com.pos.features.super_admin.user.model.response.UserResponse;
+import com.pos.features.super_admin.user.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -68,9 +68,10 @@ public class UserService {
 
     @Transactional
     public List<UserResponse> getAllUser() {
-        return userRepo.findAll().stream().map(
-                this::convertUserToUserResponse
-        ).collect(Collectors.toList());
+        return userRepo.findAll().stream()
+                .filter(u -> !u.isDeleted())
+                .map(this::convertUserToUserResponse)
+                .collect(Collectors.toList());
     }
 
 
@@ -83,7 +84,9 @@ public class UserService {
                 .permissions(obj.getPermissions())
                 .profileImgUrl(defaultProfileImage)
                 .createdDate(LocalDate.now())
-                .updateDate(isUpdate  ? LocalDate.now() : null)
+                .updateDate(isUpdate ? LocalDate.now() : null)
+                .isDeleted(false)
+                .deletedDate(null)
                 .isEnabled(true)
                 .isAccountIsActive(true)
                 .isAccountNotLocked(true)
@@ -92,6 +95,7 @@ public class UserService {
 
     private UserResponse convertUserToUserResponse(User obj) {
         return UserResponse.builder()
+                .userId(obj.getUserId())
                 .userEmail(obj.getUserEmail())
                 .userName(obj.getUserName())
                 .role(obj.getRole())
@@ -104,16 +108,27 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateUser(String email, UserRequest obj) {
-        User user = userRepo.findById(email)
-                .orElseThrow(() -> new UserNotFoundException("user not found with email " + email));
+    public UserResponse updateUser(String userId, UserRequest obj) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("user not found with email " + userId));
         return convertUserToUserResponse(userRepo.save(convertUserRequestToUser(obj, true)));
     }
 
     @Transactional
-    public void deleteUser(String email){
+    public void deleteUser(String userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("user not found with email " + userId));
+        user.setDeleted(true);
+        user.setDeletedDate(LocalDate.now());
+        userRepo.save(user);
+    }
+
+    @Transactional
+    public UserResponse disableOrEnableUser(String email) {
         User user = userRepo.findById(email)
-                .orElseThrow(() -> new UserNotFoundException("user not found with email " + email));
-        userRepo.delete(user);
+                .orElseThrow(() -> new UserNotFoundException("User not found with email " + email));
+        user.setAccountIsActive(user.isAccountIsActive() ? false : true);
+        user.setUpdateDate(LocalDate.now());
+        return convertUserToUserResponse(userRepo.save(user));
     }
 }

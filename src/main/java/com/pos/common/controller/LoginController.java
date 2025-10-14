@@ -1,8 +1,8 @@
 package com.pos.common.controller;
 
 import com.pos.common.ApiResponse;
-import com.pos.features.user.model.request.LoginUserRequest;
-import com.pos.features.user.service.UserService;
+import com.pos.features.super_admin.user.model.request.LoginUserRequest;
+import com.pos.features.super_admin.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

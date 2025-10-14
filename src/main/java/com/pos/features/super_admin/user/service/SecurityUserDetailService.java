@@ -1,8 +1,8 @@
-package com.pos.features.user.service;
+package com.pos.features.super_admin.user.service;
 
 import com.pos.exception.UserNotFoundException;
-import com.pos.features.user.model.entity.User;
-import com.pos.features.user.repo.UserRepo;
+import com.pos.features.super_admin.user.model.entity.User;
+import com.pos.features.super_admin.user.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,7 +1,7 @@
 package com.pos.config;
 
 
-import com.pos.features.user.service.SecurityUserDetailService;
+import com.pos.features.super_admin.user.service.SecurityUserDetailService;
 import com.pos.filter.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

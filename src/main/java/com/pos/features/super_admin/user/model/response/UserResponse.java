@@ -1,9 +1,7 @@
-package com.pos.features.user.model.response;
+package com.pos.features.super_admin.user.model.response;
 
 import com.pos.constant.Permission;
 import com.pos.constant.Role;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponse {
+    private String userId;
     private String userEmail;
     private String userName;
     private Role role;
