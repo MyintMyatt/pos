@@ -1,6 +1,6 @@
 package com.pos.exception.handler;
 
-import com.pos.common.ApiResponse;
+import com.pos.common.model.response.ApiResponse;
 import com.pos.exception.UserAlreadyExitedException;
 import com.pos.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;

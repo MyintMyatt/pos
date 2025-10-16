@@ -1,6 +1,6 @@
 package com.pos.common.controller;
 
-import com.pos.common.ApiResponse;
+import com.pos.common.model.response.ApiResponse;
 import com.pos.features.super_admin.user.model.request.LoginUserRequest;
 import com.pos.features.super_admin.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

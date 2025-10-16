@@ -1,6 +1,6 @@
 package com.pos.features.super_admin.user.controller;
 
-import com.pos.common.ApiResponse;
+import com.pos.common.model.response.ApiResponse;
 import com.pos.features.super_admin.user.model.request.UserRequest;
 import com.pos.features.super_admin.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
