@@ -21,7 +21,7 @@ public class UserIdGenerator implements IdentifierGenerator {
         int nextNumber = 1;
 
         if (lastId != null && lastId.length() >= 10) {
-            String numberPart = lastId.substring(8);
+            String numberPart = lastId.substring(7);
             try {
                 nextNumber = Integer.parseInt(numberPart) + 1;
             } catch (NumberFormatException e) {

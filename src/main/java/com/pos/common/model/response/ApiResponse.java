@@ -1,4 +1,4 @@
-package com.pos.common;
+package com.pos.common.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
