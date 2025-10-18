@@ -39,7 +39,12 @@ public class Discount {
     private LocalDate validFrom;
 
     @Column(nullable = false)
-    private Double validTo;
+    private LocalDate validTo;
+
+    @Column(nullable = false)
+    private boolean isDeleted;
+
+    private LocalDate deletedDate;
 
     @Column(nullable = false)
     private LocalDate createdDate;

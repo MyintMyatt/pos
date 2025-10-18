@@ -1,6 +1,6 @@
 package com.pos.features.super_admin.user.service;
 
-import com.pos.exception.UserNotFoundException;
+import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class SecurityUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String userEmail) throws UsernameNotFoundException {
        User user = userRepo.findById(userEmail)
-                .orElseThrow(() -> new UserNotFoundException("User not found with email " + userEmail));
+                .orElseThrow(() -> new NotFoundException("User not found with email " + userEmail));
 
        /*add permissions */
         Set<SimpleGrantedAuthority> authorities = user.getPermissions()

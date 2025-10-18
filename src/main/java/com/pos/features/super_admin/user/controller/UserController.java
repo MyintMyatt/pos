@@ -37,7 +37,6 @@ public class UserController {
     @PostMapping("/register")
 //    @PreAuthorize("hasRole('WRITE')")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userRequest) {
-        System.out.println(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse
                         .builder()
@@ -85,7 +84,7 @@ public class UserController {
                 ApiResponse.builder()
                         .status(200)
                         .message("user who equals " + userId)
-                        .data(userService.getUserByEmail(userId))
+                        .data(userService.getUserById(userId))
                         .build()
         );
     }

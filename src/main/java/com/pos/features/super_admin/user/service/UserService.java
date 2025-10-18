@@ -2,7 +2,7 @@ package com.pos.features.super_admin.user.service;
 
 import com.pos.common.service.JwtService;
 import com.pos.exception.UserAlreadyExitedException;
-import com.pos.exception.UserNotFoundException;
+import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.model.request.LoginUserRequest;
 import com.pos.features.super_admin.user.model.request.UserRequest;
@@ -51,10 +51,17 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse getUserByEmail(String email) {
-        User user = userRepo.findById(email)
-                .orElseThrow(() -> new UserNotFoundException("user not found with email " + email));
+    public UserResponse getUserById(String id) {
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("user not found with email " + id));
         return convertUserToUserResponse(user);
+    }
+
+    @Transactional
+    public User getUser(String id){
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("user not found with email " + id));
+        return user;
     }
 
     @Transactional
@@ -110,14 +117,14 @@ public class UserService {
     @Transactional
     public UserResponse updateUser(String userId, UserRequest obj) {
         User user = userRepo.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("user not found with email " + userId));
+                .orElseThrow(() -> new NotFoundException("user not found with email " + userId));
         return convertUserToUserResponse(userRepo.save(convertUserRequestToUser(obj, true)));
     }
 
     @Transactional
     public void deleteUser(String userId) {
         User user = userRepo.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("user not found with email " + userId));
+                .orElseThrow(() -> new NotFoundException("user not found with email " + userId));
         user.setDeleted(true);
         user.setDeletedDate(LocalDate.now());
         userRepo.save(user);
@@ -126,7 +133,7 @@ public class UserService {
     @Transactional
     public UserResponse disableOrEnableUser(String email) {
         User user = userRepo.findById(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found with email " + email));
+                .orElseThrow(() -> new NotFoundException("User not found with email " + email));
         user.setAccountIsActive(user.isAccountIsActive() ? false : true);
         user.setUpdateDate(LocalDate.now());
         return convertUserToUserResponse(userRepo.save(user));
