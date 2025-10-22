@@ -29,4 +29,3 @@ curl --silent --header "X-Vault-Token: $VAULT_TOKEN" \
 
 sleep 5
 echo "Vault initialization complete."
-

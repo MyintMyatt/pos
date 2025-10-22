@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/super-admin/user")
+@RequestMapping("/admin/user")
 @Tag(name = "User API", description = "Endpoints for managing users")
 public class UserController {
 
