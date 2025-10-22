@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/super-admin/discount")
+@RequestMapping("/admin/discount")
 @Tag(name = "Super Admin Discount API", description = "Endpoints for managing discounts")
 public class DiscountController {
     @Autowired

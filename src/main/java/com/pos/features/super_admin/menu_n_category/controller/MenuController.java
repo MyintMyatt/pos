@@ -4,8 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/super-admin/menu")
-public class SuperAdminMenuController {
+@RequestMapping("/admin/menu")
+public class MenuController {
 
 //    @PostMapping()
 }
