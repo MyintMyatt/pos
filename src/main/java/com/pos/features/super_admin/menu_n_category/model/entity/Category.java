@@ -42,4 +42,6 @@ public class Category {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by", referencedColumnName = "user_id",nullable = true)
     private User updatedBy;
+
+    private boolean isDeleted;
 }

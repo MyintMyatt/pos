@@ -34,6 +34,17 @@ public class CategoryService {
          return convertCategoryToRes(categoryRepo.save(convertReqToUpdateCategory(obj)));
     }
 
+    public CategoryResponse getCategoryById(String categoryId){
+        Category c = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id " + categoryId));
+        return convertCategoryToRes(c);
+    }
+
+    public void deleteCategory(String categoryId){
+        Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id : " + categoryId));// if category id doesn't exit, will be throw exception
+        category.setDeleted(true);
+        categoryRepo.save(category);
+    }
+
     private Category convertReqToUpdateCategory(CategoryUpdateRequest obj) {
         com.pos.features.super_admin.menu_n_category.model.entity.Category category = categoryRepo.findById(obj.getCategoryId()).orElseThrow(() -> new NotFoundException("category not found with id : " + obj.getCategoryId()));
         User updatedUser = userService.getUser(obj.getActionBy());
@@ -45,6 +56,7 @@ public class CategoryService {
                 .createdBy(category.getCreatedBy())
                 .updatedBy(updatedUser)
                 .updatedDate(LocalDate.now())
+                .isDeleted(false)
                 .build();
     }
 
