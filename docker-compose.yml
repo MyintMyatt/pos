@@ -27,6 +27,7 @@ services:
     environment:
       - VAULT_ADDR=http://vault:8200
       - VAULT_TOKEN=root
+    entrypoint: ["/bin/sh", "/init.sh"]
 
   redis:
     image: redis:latest
@@ -41,18 +42,18 @@ services:
     environment:
       - REDIS_PASSWORD=password
 
-#  pos-app:
-#    build: .
-#    container_name: pos-app
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - vault-init
-#    environment:
-#      - SPRING_CLOUD_VAULT_URI=http://vault:8200
-#      - SPRING_CLOUD_VAULT_TOKEN=root
-#    networks:
-#      - default
+  pos-app:
+    build: .
+    container_name: pos-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - vault-init
+    environment:
+      - SPRING_CLOUD_VAULT_URI=http://vault:8200
+      - SPRING_CLOUD_VAULT_TOKEN=root
+    networks:
+      - default
 
 volumes:
   redis_data:

@@ -59,4 +59,6 @@ public class MenuItem {
     @JoinColumn(name = "updated_by", referencedColumnName = "user_id",nullable = true)
     private User updatedBy;
 
+    private boolean isDeleted;
+
 }

@@ -75,7 +75,7 @@ public class DiscountController {
                     content = @Content(schema = @Schema(implementation = String.class))
             ),
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201",description = "discount that equals by id"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "discount that equals by id"),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "discount not found")
             }
     )
@@ -103,10 +103,11 @@ public class DiscountController {
                     }
             ),
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201",description = "successfully registered discount!!"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "successfully updated discount!!"),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
             }
     )
+
     @PutMapping("/{discount-id}")
     public ResponseEntity<ApiResponse<?>> updateDiscount(@PathVariable("discount-id") String disId, @RequestBody DiscountRequest obj) {
         return ResponseEntity.status(HttpStatus.OK).body(

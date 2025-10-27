@@ -16,7 +16,7 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${jwt.key}")
-    private String jwtSecretKey ;//= "0b1ac160f2abb47ca5a5de8cfe139586b55db5cc6974837979d42366a67b9e89aceae2639005059e277243c81239f8be299f453c4d8e36a21a8fe3e36df1e90b";
+    private String jwtSecretKey ; //= "0b1ac160f2abb47ca5a5de8cfe139586b55db5cc6974837979d42366a67b9e89aceae2639005059e277243c81239f8be299f453c4d8e36a21a8fe3e36df1e90b";
 
     public String generateToken(User user){
         return Jwts.builder()

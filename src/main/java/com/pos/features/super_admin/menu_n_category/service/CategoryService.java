@@ -10,8 +10,10 @@ import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class CategoryService {
@@ -22,24 +24,43 @@ public class CategoryService {
     @Autowired
     private UserService userService;
 
+    @Transactional
     public CategoryResponse createCategory(CategoryCreateRequest request) {
         return convertCategoryToRes(
                 categoryRepo.save(
                         convertReqToCreateCategory(request)
-        ));
+                ));
     }
 
-    public CategoryResponse updateCategory(CategoryUpdateRequest obj) {
-        Category category = categoryRepo.findById(obj.getCategoryId()).orElseThrow(() -> new NotFoundException("category not found with id : " + obj.getCategoryId()));
-         return convertCategoryToRes(categoryRepo.save(convertReqToUpdateCategory(obj)));
+    @Transactional
+    public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest obj) {
+        Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id : " + obj.getCategoryId()));
+        obj.setCategoryId(categoryId);
+        return convertCategoryToRes(categoryRepo.save(convertReqToUpdateCategory(obj)));
     }
 
-    public CategoryResponse getCategoryById(String categoryId){
+    @Transactional
+    public CategoryResponse getCategoryById(String categoryId) {
         Category c = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id " + categoryId));
         return convertCategoryToRes(c);
     }
 
-    public void deleteCategory(String categoryId){
+    @Transactional
+    public Category getCategoryObjById(String categoryId) {
+        Category c = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id " + categoryId));
+        return c;
+    }
+
+    @Transactional
+    public List<CategoryResponse> getAllCat() {
+        return categoryRepo.findAll().stream()
+                .filter(c -> !c.isDeleted())
+                .map(this::convertCategoryToRes)
+                .toList();
+    }
+
+    @Transactional
+    public void deleteCategory(String categoryId) {
         Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id : " + categoryId));// if category id doesn't exit, will be throw exception
         category.setDeleted(true);
         categoryRepo.save(category);
