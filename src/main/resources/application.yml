@@ -5,31 +5,36 @@ spring:
     user:
       name: orion
       password: hello
-  config:
-    import: vault://
-  cloud:
-    vault:
-      uri: http://127.0.0.1:8200
-      token: root
-      kv:
-        enabled: true
-        application-name: pos
-        backend: secret
-        default-context: pos
-        engine-version: 2
-        config:
-          lifecycle:
-            enabled: true
+#  config:
+#    import: vault://
+#  cloud:
+#    vault:
+#      uri: http://127.0.0.1:8200
+#      token: root
+#      kv:
+#        enabled: true
+#        application-name: pos
+#        backend: secret
+#        default-context: pos
+#        engine-version: 2
+#        config:
+#          lifecycle:
+#            enabled: true
+#  datasource:
+#    url: ${db-url}
+#    username: ${db-username}
+#    password: ${db-password}
+#    driver-class-name: org.postgresql.Driver
 
   datasource:
-    url: ${db-url}
-    username: ${db-username}
-    password: ${db-password}
+    url: jdbc:postgresql://pg-3cdc012-lwinthein679-8217.l.aivencloud.com:28941/orion
+    username: root
+    password: password
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -44,6 +49,21 @@ default:
     profile:
       image: https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png
 
+frontend:
+  url: http://localhost:5173
+
 jwt:
-  key: ${jwt-secret-key}
+  key: 0b1ac160f2abb47ca5a5de8cfe139586b55db5cc6974837979d42366a67b9e89aceae2639005059e277243c81239f8be299f453c4d8e36a21a8fe3e36df1e90b
+
+cloudinary:
+  cloud:
+    name: fdasfas
+  api:
+    key: asdfas
+    secret: fsdfadsfdffsfsdfasffaf
+  menu:
+    image:
+      folder-name: menu-image
+
+
 

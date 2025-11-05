@@ -37,15 +37,14 @@ echo "Writing secret data to Vault..."
 curl --silent --header "X-Vault-Token: $VAULT_TOKEN" \
       --request POST \
         --data '{"data": {
-            "db-url": "jdbc:postgresql://localhost:5432/pos",
-            "db-username": "root",
-            "db-password": "passowrd",
-            "cloudinary-cloud-name": "cloudname",
-            "cloudinary-api-key": "apikey",
-            "cloudinary-api-secret": "secret",
-             "redis-pw": "helloworld",
-            "frontend-url": "http://localhost:5173",
-            "jwt-secret-key": "0b1ac160f2abb47ca5a5de8cfe139586b55db5cc6974837979d42366a67b9e89aceae2639005059e277243c81239f8be299f453c4d8e36a21a8fe3e36df1e90b"
+           "db-url": "jdbc:postgresql://pg-3cdc012-lwinthein679-8217.l.aivencloud.com:28941/orion",
+           "db-username": "root",
+           "db-password": "password",
+           "cloudinary-cloud-name": "sdfads",
+           "cloudinary-api-key": "sdfasdf",
+           "cloudinary-api-secret": "fasdfdasfasdfffasdfasd",
+           "frontend-url": "http://localhost:5173",
+           "jwt-secret-key": "0b1ac160f2abb47ca5a5de8cfe139586b55db5cc6974837979d42366a67b9e89aceae2639005059e277243c81239f8be299f453c4d8e36a21a8fe3e36df1e90b"
         }}' \
     "$VAULT_ADDR/v1/secret/data/pos"
 

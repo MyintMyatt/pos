@@ -69,6 +69,13 @@ public class MenuService {
     }
 
     @Transactional
+    public MenuResponse updateMenuImage(String menuId, String imageUrl){
+        MenuItem menuItem = getMenuItemById(menuId);
+        menuItem.setMenuImageUrl(imageUrl);
+        return convertObjToRes(menuRepo.save(menuItem));
+    }
+
+    @Transactional
     public List<MenuResponse> getAllMenu(){
         return menuRepo.findAll()
                 .stream().filter(m -> !m.isDeleted())

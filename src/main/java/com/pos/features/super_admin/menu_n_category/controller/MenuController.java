@@ -1,26 +1,40 @@
 package com.pos.features.super_admin.menu_n_category.controller;
 
 import com.pos.common.model.response.ApiResponse;
+import com.pos.common.service.CloudinaryService;
 import com.pos.features.super_admin.menu_n_category.model.request.CategoryUpdateRequest;
 import com.pos.features.super_admin.menu_n_category.model.request.MenuCreateRequest;
 import com.pos.features.super_admin.menu_n_category.model.request.MenuUpdateRequest;
 import com.pos.features.super_admin.menu_n_category.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/menu")
-@Tag(name = "Admin Menu Api", description = "Endpoints for managing menua")
+@Tag(name = "Admin Menu Api", description = "Endpoints for managing menu")
 public class MenuController {
 
     @Autowired
     private MenuService menuService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Value("${cloudinary.menu.image.folder-name}")
+    private String menuImageFolderName;
 
     @Operation(
             summary = "Menu Creation",
@@ -45,6 +59,34 @@ public class MenuController {
                                 .data(menuService.createMenu(obj))
                 );
     }
+
+    @Operation(
+            summary = "menu image upload",
+            description = "Upload image to cloud",
+            parameters = {
+                    @Parameter(
+                            name = "file",
+                            description = "upload file",
+                            required = true,
+                            schema = @Schema(implementation = MultipartFile.class)
+                    )
+            },
+            responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "successfully uploaded !!"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")
+
+            }
+    )
+    @PostMapping("/image-upload/{menuId}")
+    public ResponseEntity<?> uploadMenuImage(@PathVariable(name = "menuId") String menuId, @RequestParam("file") MultipartFile file){
+
+        java.util.Map map = cloudinaryService.uploadFile(file, menuImageFolderName);
+        System.err.println("image data => " + map.get("url"));
+        menuService.updateMenuImage(menuId, map.get("url").toString());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(map);
+    }
+
 
     @Operation(
             summary = "Get all menu",
