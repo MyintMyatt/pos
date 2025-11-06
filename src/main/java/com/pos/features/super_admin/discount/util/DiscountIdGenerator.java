@@ -14,7 +14,7 @@ public class DiscountIdGenerator implements IdentifierGenerator {
         String prefix = "DIS" + year + month;
 
         String sql = "SELECT discount_id FROM tbl_discount ORDER BY discount_id DESC LIMIT 1;";
-        String lastId = session.createNativeQuery(sql).uniqueResult().toString();
+        String lastId = (String) session.createNativeQuery(sql).uniqueResult();
 
         int nextId = 1;
 

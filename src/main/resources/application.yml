@@ -28,8 +28,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://pg-3cdc012-lwinthein679-8217.l.aivencloud.com:28941/orion
-    username: root
-    password: password
+    username: avnadmin
+    password: AVNS_cxuvE6CJOALurLRYwjv
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -57,13 +57,11 @@ jwt:
 
 cloudinary:
   cloud:
-    name: fdasfas
+    name: dsyj1lgo4
   api:
-    key: asdfas
-    secret: fsdfadsfdffsfsdfasffaf
+    key: 178224993461218
+    secret: NxIhumjy6Ils81dIJeig7n3qXUI
   menu:
     image:
       folder-name: menu-image
-
-
 

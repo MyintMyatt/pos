@@ -1,4 +1,4 @@
-package com.pos.features.super_admin.menu_n_category.model.request;
+package com.pos.features.super_admin.inventory.model.request;
 
 import com.pos.constant.InventoryMovementType;
 import com.pos.constant.Uom;
@@ -14,22 +14,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuCreateRequest {
+public class InventoryMovementRequest {
 
-    @NotBlank(message = "menu name must not be empty or null")
-    private String menuName;
-
-    @NotBlank(message = "menu price must not be null")
-    private Double price;
-
-    @NotBlank(message = "category id must not be null")
-    private String categoryId;
-
-    @NotBlank(message = "category desc must not be null or empty")
-    private String description;
-
-    @NotNull(message = "created user must not be null")
-    private String createdBy;
+    @NotBlank(message = "menu id must not be null or empty")
+    private String menuId;
 
     @NotNull(message = "inventory movement type must not be null")
     private InventoryMovementType movementType;
@@ -39,5 +27,8 @@ public class MenuCreateRequest {
 
     @NotNull(message = "UOM must not be null")
     private Uom uom;
+
+    @NotBlank(message = "created by (user_id) must not be null or empty")
+    private String createdBy;
 
 }

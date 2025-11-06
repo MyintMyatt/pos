@@ -1,30 +1,31 @@
-package com.pos.features.super_admin.menu_n_category.util;
+package com.pos.features.super_admin.tax.util;
 
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
 import java.time.LocalDate;
 
-public class MenuItemGenerator implements IdentifierGenerator {
+public class TaxIdGenerator implements IdentifierGenerator {
     @Override
     public Object generate(SharedSessionContractImplementor session, Object o) {
-
         LocalDate now = LocalDate.now();
         String year = String.format("%02d", now.getYear() % 100);
         String month = String.format("%02d", now.getMonthValue());
-        String sql = "SELECT menu_id FROM tbl_menu_item ORDER BY menu_id DESC LIMIT 1";
+        String prefix = "TAX" + year + month;
+
+        String sql = "SELECT tax_id FROM tbl_tax ORDER BY tax_id DESC LIMIT 1;";
         String lastId =(String) session.createNativeQuery(sql).uniqueResult();
 
-        int nextNumber = 1;
-        if (lastId != null && lastId.length() >= 9) {
-            String numberPart = lastId.substring(5);
+        int nextId = 1;
+
+        if (lastId != null && lastId.length() >= 7){
+            String numberPart = lastId.substring(7);
             try {
-                nextNumber = Integer.parseInt(numberPart) + 1;
+                nextId = Integer.parseInt(numberPart);
             } catch (NumberFormatException e) {
-                nextNumber = 1;
+                nextId = 1;
             }
         }
-        return "M" + year + month + String.format("%05d", nextNumber);
+        return prefix + String.format("%04d", nextId);
     }
-
 }

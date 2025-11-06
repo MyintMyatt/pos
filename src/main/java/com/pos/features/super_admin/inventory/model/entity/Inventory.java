@@ -1,5 +1,7 @@
-package com.pos.features.super_admin.menu_n_category.model.entity;
+package com.pos.features.super_admin.inventory.model.entity;
 
+import com.pos.constant.Uom;
+import com.pos.features.super_admin.menu_n_category.model.entity.MenuItem;
 import com.pos.features.super_admin.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,23 +13,30 @@ import org.hibernate.annotations.GenericGenerator;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "tbl_category")
+@Table(name = "tbl_inventory")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
+public class Inventory {
     @Id
-    @GeneratedValue(generator = "category-id-generator")
+    @GeneratedValue(generator = "inventory-id-generator")
     @GenericGenerator(
-            name = "category-id-generator",
-            strategy = "com.pos.features.super_admin.menu_n_category.util.CategoryIdGenerator"
+            name = "inventory-id-generator",
+            strategy = "com.pos.features.super_admin.inventory.util.InventoryIdGenerator"
     )
-    @Column(name = "category_id", length = 5)
-    private String categoryId;
+    @Column(name = "inventory_id", length = 15)
+    private String inventoryId;
 
-    @Column(nullable = false, length = 100)
-    private String categoryName;
+    @OneToOne
+    @JoinColumn(name = "fk_menu_id", referencedColumnName = "menu_id", nullable = false, unique = true)
+    private MenuItem menuItem;
+
+    @Column(nullable = false)
+    private double quantity= 0.0;
+
+    @Enumerated(EnumType.STRING)
+    private Uom uom;
 
     @Column(nullable = false)
     private LocalDate createdDate;
@@ -36,12 +45,10 @@ public class Category {
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
     private User createdBy;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private LocalDate updatedDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by", referencedColumnName = "user_id",nullable = true)
     private User updatedBy;
-
-    private boolean isDeleted;
 }

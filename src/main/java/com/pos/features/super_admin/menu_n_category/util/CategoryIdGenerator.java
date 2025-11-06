@@ -9,8 +9,8 @@ public class CategoryIdGenerator implements IdentifierGenerator {
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object o) {
 
-        String sql = "SELECT category_id FROM tbl_category ORDER_BY user_id DESC LIMIT 1";
-        String lastId = session.createNativeQuery(sql).uniqueResult().toString();
+        String sql = "SELECT category_id FROM tbl_category ORDER BY category_id DESC LIMIT 1";
+        String lastId =(String) session.createNativeQuery(sql).uniqueResult();
 
         int nextNumber = 1;
         if (lastId != null && lastId.length() >= 5){

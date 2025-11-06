@@ -93,6 +93,6 @@ public class CategoryService {
 
     private CategoryResponse convertCategoryToRes(Category obj) {
         return new CategoryResponse(obj.getCategoryId(), obj.getCategoryName(), obj.getCreatedDate(), obj.getCreatedBy().getUserId(),
-                obj.getUpdatedDate(), obj.getUpdatedBy().getUserId());
+                obj.getUpdatedDate(), obj.getUpdatedBy() == null ? null :  obj.getUpdatedBy().getUserId());
     }
 }

@@ -1,6 +1,8 @@
 package com.pos.features.super_admin.menu_n_category.service;
 
 import com.pos.exception.NotFoundException;
+import com.pos.features.super_admin.inventory.model.request.InventoryMovementRequest;
+import com.pos.features.super_admin.inventory.service.InventoryService;
 import com.pos.features.super_admin.menu_n_category.model.entity.Category;
 import com.pos.features.super_admin.menu_n_category.model.entity.MenuItem;
 import com.pos.features.super_admin.menu_n_category.model.request.MenuCreateRequest;
@@ -29,61 +31,78 @@ public class MenuService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private InventoryService inventoryService;
+
     @Transactional
-    public MenuResponse createMenu(MenuCreateRequest obj){
-       Category c =  categoryService.getCategoryObjById(obj.getCategoryId());
-       User u = userService.getUser(obj.getCategoryId());
-       return convertObjToRes(menuRepo.save(convertCreateReqToMenu(obj, c, u)));
+    public MenuResponse createMenu(MenuCreateRequest obj) {
+        Category c = categoryService.getCategoryObjById(obj.getCategoryId());
+        User u = userService.getUser(obj.getCategoryId());
+        MenuItem menuItem = menuRepo.save(convertCreateReqToMenu(obj, c, u));
+        // add stock
+        inventoryService.inventoryMovementControl(
+                InventoryMovementRequest.builder()
+                        .menuId(menuItem.getMenuId())
+                        .movementType(obj.getMovementType())
+                        .quantity(obj.getQuantity())
+                        .uom(obj.getUom())
+                        .build()
+        );
+
+        return convertObjToRes(menuItem);
     }
 
     @Transactional
-    public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj){
+    public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj) {
         User updatedBy = userService.getUser(obj.getCategoryId());
         MenuItem existingMenu = getMenuItemById(menuId);
         Category category;
 
         // if update category, we need to update this
-        if (existingMenu.getCategory().getCategoryId() != obj.getCategoryId()){
+        if (existingMenu.getCategory().getCategoryId() != obj.getCategoryId()) {
             category = categoryService.getCategoryObjById(obj.getCategoryId());
             existingMenu.setCategory(category);
         }
-        return convertObjToRes(menuRepo.save(convertUpdateReqToMenu(obj,existingMenu, updatedBy)));
+        return convertObjToRes(menuRepo.save(convertUpdateReqToMenu(obj, existingMenu, updatedBy)));
     }
 
     @Transactional
-    public MenuItem getMenuItemById(String menuId){
-        return menuRepo.findById(menuId).orElseThrow(
+    public MenuItem getMenuItemById(String menuId) {
+
+        MenuItem menuItem = menuRepo.findById(menuId).orElseThrow(
                 () -> new NotFoundException("menu not found with id " + menuId)
         );
+        if (menuItem.isDeleted()) throw new NotFoundException("menu not found with id " + menuId);
+        return menuItem;
     }
 
     @Transactional
-    public MenuResponse getMenuResponseById(String menuId){
+    public MenuResponse getMenuResponseById(String menuId) {
         return convertObjToRes(getMenuItemById(menuId));
     }
 
     @Transactional
-    public void  deleteMenu(String menuId){
+    public void deleteMenu(String menuId) {
         MenuItem menu = getMenuItemById(menuId);
         menuRepo.save(menu);
     }
 
     @Transactional
-    public MenuResponse updateMenuImage(String menuId, String imageUrl){
+    public MenuResponse updateMenuImage(String menuId, String imageUrl) {
         MenuItem menuItem = getMenuItemById(menuId);
         menuItem.setMenuImageUrl(imageUrl);
         return convertObjToRes(menuRepo.save(menuItem));
     }
 
     @Transactional
-    public List<MenuResponse> getAllMenu(){
+    public List<MenuResponse> getAllMenu() {
         return menuRepo.findAll()
                 .stream().filter(m -> !m.isDeleted())
                 .map(this::convertObjToRes)
                 .toList();
     }
 
-    private MenuItem convertCreateReqToMenu(MenuCreateRequest obj, Category category, User user){
+    private MenuItem convertCreateReqToMenu(MenuCreateRequest obj, Category category, User user) {
         return MenuItem.builder()
                 .menuName(obj.getMenuName())
                 .price(obj.getPrice())
@@ -96,7 +115,7 @@ public class MenuService {
                 .build();
     }
 
-    private MenuItem convertUpdateReqToMenu(MenuUpdateRequest obj,MenuItem existing, User updatedBy){
+    private MenuItem convertUpdateReqToMenu(MenuUpdateRequest obj, MenuItem existing, User updatedBy) {
         return MenuItem.builder()
                 .menuName(obj.getMenuName())
                 .price(obj.getPrice())
@@ -111,7 +130,7 @@ public class MenuService {
                 .build();
     }
 
-    private MenuResponse convertObjToRes(MenuItem obj){
+    private MenuResponse convertObjToRes(MenuItem obj) {
         return new MenuResponse(
                 obj.getMenuId(),
                 obj.getMenuName(),

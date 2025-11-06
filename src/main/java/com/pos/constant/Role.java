@@ -1,7 +1,7 @@
 package com.pos.constant;
 
 public enum Role {
-    SUPERADMIN,
+    SUPERVISOR,
     ADMIN,
     CASHIER
 }
