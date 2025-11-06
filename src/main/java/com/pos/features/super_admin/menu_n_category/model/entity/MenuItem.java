@@ -52,7 +52,7 @@ public class MenuItem {
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
     private User createdBy;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate updatedDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

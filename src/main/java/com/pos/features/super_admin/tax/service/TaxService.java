@@ -1,5 +1,6 @@
 package com.pos.features.super_admin.tax.service;
 
+import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.tax.model.entity.Tax;
 import com.pos.features.super_admin.tax.model.request.TaxRequest;
 import com.pos.features.super_admin.tax.model.response.TaxResponse;
@@ -7,6 +8,7 @@ import com.pos.features.super_admin.tax.repo.TaxRepo;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,26 @@ public class TaxService {
     @Autowired
     private UserService userService;
 
+    /**
+     * Runs every day at 00:00 to update tax active status.
+     */
+    @Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
+    @Transactional
+    public void updateTaxStatus() {
+        List<Tax> taxes = taxRepo.findAll();
+        LocalDate today = LocalDate.now();
+
+        for (Tax tax : taxes) {
+            boolean shouldBeActive = !today.isBefore(tax.getValidFromDate())
+                    && (tax.getValidToDate() == null || !today.isAfter(tax.getValidToDate()));
+
+            if (tax.isActive() != shouldBeActive) {
+                tax.setActive(shouldBeActive);
+                taxRepo.save(tax);
+            }
+        }
+    }
+
     @Transactional
     public TaxResponse createTax(TaxRequest req) {
         if (req.getValidTo().isBefore(req.getValidFrom()) || req.getValidTo().isBefore(LocalDate.now()))
@@ -36,16 +58,11 @@ public class TaxService {
         return convertTaxToResponse(tax);
     }
 
-//    @Transactional
-//    public Tax updateTax(String taxId, TaxRequest req) {
-//        if (getDiscount(disId) == null)
-//            throw new NotFoundException("Discount not found with id " + disId);
-//        return convertDiscountToDisResponse(discountRepo.save(convertDisRequestToDiscount(req, true)));
-//    }
 
     @Transactional
-    public Tax getTax() {
-        return taxRepo.findAll().get(0);
+    public Tax getTaxById(String taxId) {
+        Tax tax = taxRepo.findById(taxId).orElseThrow(() -> new NotFoundException("tax not found: " + taxId));
+        return tax;
     }
 
     @Transactional
@@ -56,13 +73,7 @@ public class TaxService {
                 .collect(Collectors.toList());
     }
 
-//    @Transactional
-//    public void deleteDiscount(String disId){
-//        Discount dis = discountRepo.findById(disId).orElseThrow(() -> new NotFoundException("Discount not found with id " + disId));
-//        dis.setDeleted(true);
-//        dis.setDeletedDate(LocalDate.now());
-//        discountRepo.save(dis);
-//    }
+
 
     private TaxResponse convertTaxToResponse(Tax obj) {
         return TaxResponse.builder()

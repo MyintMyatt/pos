@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -51,7 +52,7 @@ public class MenuController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> createMenu(@Validated  @RequestBody MenuCreateRequest obj){
+    public ResponseEntity<?> createMenu(@Valid @RequestBody MenuCreateRequest obj){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         ApiResponse.builder()
@@ -92,18 +93,29 @@ public class MenuController {
     @Operation(
             summary = "Get all menu",
             description = "Retrieve all menu from system",
+            parameters = {
+                    @Parameter(name = "page", description = "Page number (0-based)", required = false),
+                    @Parameter(name = "size", description = "Number of items per page", required = false),
+                    @Parameter(name = "keyword", description = "Search keyword for menu name", required = false),
+                    @Parameter(name = "categoryId", description = "Filter by category ID", required = false)
+            },
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "all registered menu list"),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
             }
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getAllMenu() {
+    public ResponseEntity<ApiResponse<?>> getAllMenu(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String categoryId
+    ) {
         return ResponseEntity.status(200).body(
                 ApiResponse.builder()
                         .status(200)
                         .message("all registered menu list")
-                        .data(menuService.getAllMenu())
+                        .data(menuService.getAllMenu(page, size, keyword, categoryId))
                         .build()
         );
     }
@@ -152,7 +164,7 @@ public class MenuController {
     )
 
     @PutMapping("/{menuId}")
-    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("menuId") String menuId, @RequestBody MenuUpdateRequest obj) {
+    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("menuId") String menuId,@Valid @RequestBody MenuUpdateRequest obj) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.builder()
                         .status(200)

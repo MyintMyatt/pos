@@ -1,6 +1,9 @@
 package com.pos.features.super_admin.menu_n_category.service;
 
 import com.pos.exception.NotFoundException;
+import com.pos.features.super_admin.discount.model.entity.MenuItemDiscount;
+import com.pos.features.super_admin.discount.model.response.MenuItemDiscountResponse;
+import com.pos.features.super_admin.discount.repo.MenuItemDiscountRepository;
 import com.pos.features.super_admin.inventory.model.request.InventoryMovementRequest;
 import com.pos.features.super_admin.inventory.service.InventoryService;
 import com.pos.features.super_admin.menu_n_category.model.entity.Category;
@@ -12,6 +15,11 @@ import com.pos.features.super_admin.menu_n_category.repo.MenuRepo;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +42,10 @@ public class MenuService {
     @Autowired
     private InventoryService inventoryService;
 
+    @Autowired
+    private MenuItemDiscountRepository menuItemDiscountRepository;
+
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse createMenu(MenuCreateRequest obj) {
         Category c = categoryService.getCategoryObjById(obj.getCategoryId());
@@ -52,6 +64,7 @@ public class MenuService {
         return convertObjToRes(menuItem);
     }
 
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj) {
         User updatedBy = userService.getUser(obj.getCategoryId());
@@ -81,12 +94,14 @@ public class MenuService {
         return convertObjToRes(getMenuItemById(menuId));
     }
 
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public void deleteMenu(String menuId) {
         MenuItem menu = getMenuItemById(menuId);
         menuRepo.save(menu);
     }
 
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenuImage(String menuId, String imageUrl) {
         MenuItem menuItem = getMenuItemById(menuId);
@@ -94,13 +109,26 @@ public class MenuService {
         return convertObjToRes(menuRepo.save(menuItem));
     }
 
-    @Transactional
-    public List<MenuResponse> getAllMenu() {
-        return menuRepo.findAll()
-                .stream().filter(m -> !m.isDeleted())
-                .map(this::convertObjToRes)
-                .toList();
-    }
+//    @Transactional
+//    public List<MenuResponse> getAllMenu() {
+//        return menuRepo.findAll()
+//                .stream().filter(m -> !m.isDeleted())
+//                .map(this::convertObjToRes)
+//                .toList();
+//    }
+@Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
+@Transactional
+public Page<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
+    Pageable pageable = PageRequest.of(page, size);
+    Page<MenuItem> menuPage = menuRepo.searchMenu(
+            (keyword != null && !keyword.isBlank()) ? keyword : null,
+            (categoryId != null && !categoryId.isBlank()) ? categoryId : null,
+            pageable
+    );
+
+    return menuPage.map(this::convertObjToRes);
+}
+
 
     private MenuItem convertCreateReqToMenu(MenuCreateRequest obj, Category category, User user) {
         return MenuItem.builder()
@@ -142,8 +170,36 @@ public class MenuService {
                 obj.getCreatedBy(),
                 obj.getCreatedDate(),
                 obj.getUpdatedBy(),
-                obj.getUpdatedDate()
+                obj.getUpdatedDate(),
+                getDiscountsForMenu(obj)
         );
-
     }
+
+    @Transactional
+    private List<MenuItemDiscountResponse> getDiscountsForMenu(MenuItem menuItem) {
+        List<MenuItemDiscount> discounts = menuItemDiscountRepository.findByMenuItem_MenuId(menuItem.getMenuId());
+
+        return discounts.stream()
+                .filter(mid -> {
+                    // Only valid discounts
+                    var dis = mid.getDiscount();
+                    return !dis.isDeleted()
+                            && LocalDate.now().isAfter(dis.getValidFrom().minusDays(1))
+                            && LocalDate.now().isBefore(dis.getValidTo().plusDays(1));
+                })
+                .map(mid -> MenuItemDiscountResponse.builder()
+                        .id(mid.getId())
+                        .menuId(menuItem.getMenuId())
+                        .menuName(menuItem.getMenuName())
+                        .discountId(mid.getDiscount().getDiscountId())
+                        .discountValue(mid.getDiscount().getDiscountValue())
+                        .discountType(mid.getDiscount().getDiscountType().name())
+                        .validFrom(mid.getDiscount().getValidFrom())
+                        .validTo(mid.getDiscount().getValidTo())
+                        .createdDate(mid.getCreatedDate())
+                        .createdBy(mid.getCreatedBy().getUserName()) // or getUsername()
+                        .build())
+                .toList();
+    }
+
 }

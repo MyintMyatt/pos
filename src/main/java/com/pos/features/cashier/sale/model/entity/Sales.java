@@ -1,6 +1,5 @@
-package com.pos.features.super_admin.discount.model.entity;
+package com.pos.features.cashier.sale.model.entity;
 
-import com.pos.constant.DiscountType;
 import com.pos.features.super_admin.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,40 +9,36 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
-@Table(name = "tbl_discount")
+@Table(name = "tbl_sales")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Discount {
+public class Sales {
 
     @Id
-    @GeneratedValue(generator = "dis-id-generator")
+    @GeneratedValue(generator = "sales-id-generator")
     @GenericGenerator(
-            name = "dis-id-generator",
-            strategy = "com.pos.features.super_admin.discount.util.DiscountIdGenerator"
+            name = "sales-id-generator",
+            strategy = "com.pos.features.cashier.sale.util.SalesIdGenerator"
     )
-    @Column(name = "discount_id", length = 12)
-    private String discountId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DiscountType discountType;
+    @Column(name = "sales_id", length = 15)
+    private String salesId;
 
     @Column(nullable = false)
-    private Double discountValue;
+    private LocalDate saleDate;
 
     @Column(nullable = false)
-    private LocalDate validFrom;
-
-    private LocalDate validTo;
+    private Double subTotal;
 
     @Column(nullable = false)
-    private boolean isDeleted;
+    private Double totalAmount;
 
-    private LocalDate deletedDate;
+    @OneToMany(mappedBy = "sales", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SalesItem> salesItems;
 
     @Column(nullable = false)
     private LocalDate createdDate;
@@ -57,6 +52,5 @@ public class Discount {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by", referencedColumnName = "user_id",nullable = true)
     private User updatedBy;
-
 
 }
