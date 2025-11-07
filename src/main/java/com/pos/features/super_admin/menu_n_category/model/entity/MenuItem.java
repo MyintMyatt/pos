@@ -1,5 +1,6 @@
 package com.pos.features.super_admin.menu_n_category.model.entity;
 
+import com.pos.features.super_admin.inventory.model.entity.Inventory;
 import com.pos.features.super_admin.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,6 +38,10 @@ public class MenuItem implements Serializable {
     private Category category;
 
     private String menuImageUrl;
+
+    @OneToOne
+    @JoinColumn(name = "fk_inventory_id", referencedColumnName = "inventory_id")
+    private Inventory inventory;
 
     @Column(nullable = false)
     private boolean isThereDiscount;

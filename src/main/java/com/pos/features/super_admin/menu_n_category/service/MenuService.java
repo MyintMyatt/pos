@@ -68,7 +68,7 @@ public class MenuService {
         return menuResponse;
     }
 
-//    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj) {
         User updatedBy = userService.getUser(obj.getCategoryId());
@@ -98,14 +98,14 @@ public class MenuService {
         return convertObjToRes(getMenuItemById(menuId));
     }
 
-//    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public void deleteMenu(String menuId) {
         MenuItem menu = getMenuItemById(menuId);
         menuRepo.save(menu);
     }
 
-//    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenuImage(String menuId, String imageUrl) {
         MenuItem menuItem = getMenuItemById(menuId);
@@ -120,7 +120,7 @@ public class MenuService {
 //                .map(this::convertObjToRes)
 //                .toList();
 //    }
-//    @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
+    @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
     @Transactional
     public PageDTO<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
 //        Pageable pageable = PageRequest.of(page, size);
@@ -140,7 +140,7 @@ public class MenuService {
         );
 
         List<MenuResponse> content = menuPage.stream().map(this::convertObjToRes).toList();
-        return new PageDTO<>(content, page, size, menuPage.getTotalElements());
+        return new PageDTO<>(content, page, size, menuPage.getTotalElements(), menuPage.getTotalPages());
     }
 
 
@@ -172,7 +172,7 @@ public class MenuService {
                 .build();
     }
 
-    private MenuResponse convertObjToRes(MenuItem obj) {
+    public MenuResponse convertObjToRes(MenuItem obj) {
         return new MenuResponse(
                 obj.getMenuId(),
                 obj.getMenuName(),
@@ -185,6 +185,7 @@ public class MenuService {
                 obj.getCreatedDate().toString(),
                 obj.getUpdatedBy() != null ? userService.convertUserToUserResponse(obj.getUpdatedBy()) : null,
                 obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null,
+                inventoryService.convertObjToInvCustomRes(obj.getInventory()),
                 getDiscountsForMenu(obj)
         );
     }

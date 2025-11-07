@@ -1,5 +1,6 @@
 package com.pos.features.cashier.sale.service;
 
+import com.pos.common.model.response.PageDTO;
 import com.pos.constant.DiscountType;
 import com.pos.constant.InventoryMovementType;
 import com.pos.constant.Uom;
@@ -56,7 +57,7 @@ public class SalesService {
 
 
     @Autowired
-    public SalesService(InventoryService inventoryService, SalesTaxRepo salesTaxRepo, SalesRepo salesRepo, @Lazy UserService userService,@Lazy MenuService menuService, TaxService taxService, MenuItemDiscountRepository menuItemDiscountRepository,SalesItemRepo salesItemRepo) {
+    public SalesService(InventoryService inventoryService, SalesTaxRepo salesTaxRepo, SalesRepo salesRepo, @Lazy UserService userService, @Lazy MenuService menuService, TaxService taxService, MenuItemDiscountRepository menuItemDiscountRepository, SalesItemRepo salesItemRepo) {
         this.salesRepo = salesRepo;
         this.userService = userService;
         this.menuService = menuService;
@@ -83,7 +84,7 @@ public class SalesService {
 
         //create sale
         Sales sales = Sales.builder()
-                .saleDate(LocalDate.now())
+                .saleDate(request.getSaleDate())
                 .subTotal(subtotal)
                 .totalAmount(0.0)
                 .createdBy(createdBy)
@@ -142,16 +143,16 @@ public class SalesService {
             salesItems.add(salesItem);
 
             //for inventory
-           Inventory inventory = inventoryService.getInventoryByMenuId(salesItem.getMenuItem().getMenuId());
-           inventoryService.inventoryMovementTypeCheck(
-                   InventoryMovementRequest.builder()
-                           .menuId(salesItem.getMenuItem().getMenuId())
-                           .movementType(InventoryMovementType.SALE)
-                           .quantity(salesItem.getQuantity())
-                           .uom(Uom.Qty)
-                           .createdBy(createdBy.getUserId())
-                           .build()
-                   , inventory,createdBy,menuItem);
+            Inventory inventory = inventoryService.getInventoryByMenuId(salesItem.getMenuItem().getMenuId());
+            inventoryService.inventoryMovementTypeCheck(
+                    InventoryMovementRequest.builder()
+                            .menuId(salesItem.getMenuItem().getMenuId())
+                            .movementType(InventoryMovementType.SALE)
+                            .quantity(salesItem.getQuantity())
+                            .uom(Uom.Qty)
+                            .createdBy(createdBy.getUserId())
+                            .build()
+                    , inventory, createdBy, menuItem);
 
         }
 
@@ -182,7 +183,6 @@ public class SalesService {
         }
 
 
-
         sales.setSubTotal(subtotal);
         sales.setTotalAmount(subtotal + totalTaxAmount);
         salesRepo.save(sales);
@@ -190,20 +190,39 @@ public class SalesService {
         return convertToSalesResponse(sales);
     }
 
-    @Cacheable(value = "salesCache", key = "#page + '-' + #size + '-' + #keyword")
-    @Transactional
-    public Page<SalesResponse> getAllSales(int page, int size, String keyword) {
+    //    @Cacheable(value = "salesCache", key = "#page + '-' + #size + '-' + #keyword")
+//    @Transactional
+//    public Page<SalesResponse> getAllSales(int page, int size, String keyword) {
+//        Pageable pageable = PageRequest.of(page, size);
+//
+//        Page<Sales> salesPage;
+//        if (keyword != null && !keyword.isEmpty()) {
+//            salesPage = salesRepo.searchSales(keyword, pageable); // <-- JPQL query
+//        } else {
+//            salesPage = salesRepo.findAll(pageable);
+//        }
+//
+//        return salesPage.map(this::convertToSalesResponse);
+//    }
+    @Cacheable(value = "salesCache", key = "#page + '-' + #size + '-' + #keyword + '-' + (#startDate != null ? #startDate.toString() : '') + '-' + (#endDate != null ? #endDate.toString() : '')")
+    @Transactional(readOnly = true)
+    public PageDTO<SalesResponse> getAllSales(int page, int size, String keyword, LocalDate startDate, LocalDate endDate) {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Sales> salesPage;
-        if (keyword != null && !keyword.isEmpty()) {
-            salesPage = salesRepo.searchSales(keyword, pageable); // <-- JPQL query
+        if ((keyword != null && !keyword.isEmpty()) || startDate != null || endDate != null) {
+            //salesPage = salesRepo.searchSales(keyword, startDate, endDate, pageable);
+            salesPage = salesRepo.findAll(pageable);
+
         } else {
             salesPage = salesRepo.findAll(pageable);
         }
+        List<SalesResponse> content = salesPage.stream().map(this::convertToSalesResponse).toList();
+        return new PageDTO<>(content, page, size, salesPage.getTotalElements(),salesPage.getTotalPages());
 
-        return salesPage.map(this::convertToSalesResponse);
+        // return salesPage.map(this::convertToSalesResponse);
     }
+
 
     private SalesResponse convertToSalesResponse(Sales sale) {
         List<SalesItemResponse> itemResponses = sale.getSalesItems() // you need @OneToMany in Sales
@@ -225,7 +244,7 @@ public class SalesService {
                 .totalAmount(sale.getTotalAmount())
                 .createdBy(userService.convertUserToUserResponse(sale.getCreatedBy()))
                 .createdDate(sale.getCreatedDate().toString())
-                .updatedBy(sale.getUpdatedBy() != null ? userService.convertUserToUserResponse(sale.getUpdatedBy()): null)
+                .updatedBy(sale.getUpdatedBy() != null ? userService.convertUserToUserResponse(sale.getUpdatedBy()) : null)
                 .updatedDate(sale.getUpdatedDate() != null ? sale.getUpdatedDate().toString() : null)
                 .items(itemResponses)
                 .build();

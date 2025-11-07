@@ -6,6 +6,8 @@ import com.pos.exception.OutOfStockException;
 import com.pos.features.super_admin.inventory.model.entity.Inventory;
 import com.pos.features.super_admin.inventory.model.entity.InventoryMovement;
 import com.pos.features.super_admin.inventory.model.request.InventoryMovementRequest;
+import com.pos.features.super_admin.inventory.model.response.InventoryCustomResponse;
+import com.pos.features.super_admin.inventory.model.response.InventoryMovementResponse;
 import com.pos.features.super_admin.inventory.model.response.InventoryResponse;
 import com.pos.features.super_admin.inventory.repo.InventoryMovementRepository;
 import com.pos.features.super_admin.inventory.repo.InventoryRepository;
@@ -13,14 +15,19 @@ import com.pos.features.super_admin.menu_n_category.model.entity.MenuItem;
 import com.pos.features.super_admin.menu_n_category.service.MenuService;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
+import jakarta.persistence.Table;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @NoArgsConstructor
@@ -39,7 +46,7 @@ public class InventoryService {
         this.menuService = menuService;
     }
 
-
+    @CacheEvict(value = "InvMovement")
     @Transactional
     public InventoryResponse inventoryMovementControl(InventoryMovementRequest req) {
         System.err.println("Inventory Movement => " + req);
@@ -54,11 +61,33 @@ public class InventoryService {
        return inventoryMovementTypeCheck(req, inventory, createdBy, menuItem);
     }
 
+    @Cacheable(value = "InvMovement")
+    @Transactional
+    public List<InventoryMovementResponse> getAllInvMovement(){
+        return movementRepository.findAll()
+                .stream()
+                .map(this::convertEntityToRes)
+                .collect(Collectors.toList());
+    }
+
+    private InventoryMovementResponse convertEntityToRes(InventoryMovement obj) {
+        return new InventoryMovementResponse(
+                obj.getInventoryMovementId(),
+                obj.getQuantityChange(),
+                obj.getInventoryMovementType(),
+                convertInventoryToRes(obj.getInventory()),
+                obj.getCreatedDate().toString(),
+                userService.convertUserToUserResponse(obj.getCreatedBy())
+        );
+    }
+
+    @CacheEvict(value = "InvMovement")
     @Transactional
     public Inventory getInventoryByMenuId(String menuId){
         return inventoryRepository.findByMenuItem_MenuId(menuId);
     }
 
+    @CacheEvict(value = "InvMovement")
     @Transactional
     public InventoryResponse inventoryMovementTypeCheck(InventoryMovementRequest req, Inventory inventory, User createdBy, MenuItem menuItem){
         /*
@@ -74,7 +103,7 @@ public class InventoryService {
                 return convertInventoryToRes(inventoryMovementControlForSale(inventory, req, createdBy));
             }
             case RESTOCK -> {
-                return convertInventoryToRes(inventoryMovementControlForReStock(req, menuItem, createdBy));
+                return convertInventoryToRes(inventoryMovementControlForReStock(inventory, req, menuItem, createdBy));
             }
             case DAMAGE -> {
                 return convertInventoryToRes(inventoryMovementControlForDamage(inventory, req, createdBy));
@@ -97,10 +126,21 @@ public class InventoryService {
     }
 
     @Transactional
-    private Inventory inventoryMovementControlForReStock(InventoryMovementRequest req,MenuItem menuItem, User createdBy) {
-        Inventory inventory = new Inventory();
+    private Inventory inventoryMovementControlForReStock(Inventory exitingInv, InventoryMovementRequest req,MenuItem menuItem, User createdBy) {
+        int currentStock = 0;
+        Inventory inventory = null;
+        if (exitingInv == null) {
+            inventory = new Inventory();
+        }else {
+            System.err.println("exit qty => " + exitingInv.getQuantity());
+            currentStock = exitingInv.getQuantity();
+            inventory = exitingInv;
+            inventory.setInventoryId(exitingInv.getInventoryId());
+            inventory.setUpdatedDate(LocalDate.now());
+            inventory.setUpdatedBy(createdBy);
+        }
         inventory.setMenuItem(menuItem);
-        inventory.setQuantity(req.getQuantity());
+        inventory.setQuantity(currentStock + req.getQuantity());
         inventory.setUom(req.getUom());
         inventory.setCreatedBy(createdBy);
         inventory.setCreatedDate(LocalDate.now());
@@ -135,16 +175,24 @@ public class InventoryService {
         movementRepository.save(movement);
     }
 
-    private InventoryResponse convertInventoryToRes(Inventory obj){
+    public InventoryResponse convertInventoryToRes(Inventory obj){
         return new InventoryResponse(
                 obj.getInventoryId(),
-                obj.getMenuItem(),
+                menuService.convertObjToRes(obj.getMenuItem()),
                 obj.getQuantity(),
                 obj.getUom(),
-                obj.getCreatedDate(),
-                obj.getCreatedBy(),
-                obj.getUpdatedDate(),
-                obj.getUpdatedBy()
+                obj.getCreatedDate().toString(),
+                userService.convertUserToUserResponse( obj.getCreatedBy()),
+                obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null,
+                obj.getUpdatedBy() == null ? null : userService.convertUserToUserResponse(obj.getUpdatedBy())
+        );
+    }
+
+    public InventoryCustomResponse convertObjToInvCustomRes(Inventory obj){
+        return new InventoryCustomResponse(
+                obj.getInventoryId(),
+                obj.getQuantity(),
+                obj.getUom()
         );
     }
 }

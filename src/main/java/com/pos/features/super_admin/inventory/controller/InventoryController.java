@@ -9,10 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin/inventory")
@@ -51,6 +48,16 @@ public class InventoryController {
                                 .data(inventoryService.inventoryMovementControl(request))
                                 .build()
                 );
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllInventroyMovement(){
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .status(200)
+                        .message("all inventory movement")
+                        .data(inventoryService.getAllInvMovement()).build()
+        );
     }
 
 

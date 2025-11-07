@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/cashier/sales")
 @Tag(name = "Cashier Sale Api", description = "Endpoints for managing sale")
@@ -88,14 +90,16 @@ public class SaleController {
     public ResponseEntity<ApiResponse<?>> getAllSales(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+
     ) {
-        Page<SalesResponse> sales = salesService.getAllSales(page, size, keyword);
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .status(200)
                         .message("All sales list")
-                        .data(sales)
+                        .data(salesService.getAllSales(page, size, keyword, startDate, endDate))
                         .build()
         );
     }

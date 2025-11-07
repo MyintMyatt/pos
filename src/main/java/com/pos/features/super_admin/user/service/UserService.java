@@ -1,6 +1,7 @@
 package com.pos.features.super_admin.user.service;
 
 import com.pos.common.service.JwtService;
+import com.pos.constant.Permission;
 import com.pos.exception.UserAlreadyExitedException;
 import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.user.model.entity.User;
@@ -18,9 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,12 +108,13 @@ public class UserService {
     }
 
     public UserResponse convertUserToUserResponse(User obj) {
+        Set<Permission> permissions = new HashSet<>(obj.getPermissions());
         return UserResponse.builder()
                 .userId(obj.getUserId())
                 .userEmail(obj.getUserEmail())
                 .userName(obj.getUserName())
                 .role(obj.getRole())
-                .permissions(obj.getPermissions())
+                .permissions(permissions)
                 .profileImgUrl(obj.getProfileImgUrl())
                 .createdDate(obj.getCreatedDate().toString())
                 .isAccountIsActive(obj.isAccountIsActive())

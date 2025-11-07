@@ -34,7 +34,7 @@ public class Inventory implements Serializable {
     private MenuItem menuItem;
 
     @Column(nullable = false)
-    private double quantity= 0.0;
+    private Integer quantity= 0;
 
     @Enumerated(EnumType.STRING)
     private Uom uom;

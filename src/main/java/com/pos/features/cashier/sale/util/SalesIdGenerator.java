@@ -17,11 +17,11 @@ public class SalesIdGenerator implements IdentifierGenerator {
         String lastId =(String) session.createNativeQuery(sql).uniqueResult();
 
         int nextId = 1;
-
+//S2511000001
         if (lastId != null && lastId.length() >= 7){
             String numberPart = lastId.substring(7);
             try {
-                nextId = Integer.parseInt(numberPart);
+                nextId = Integer.parseInt(numberPart) + 1;
             } catch (NumberFormatException e) {
                 nextId = 1;
             }

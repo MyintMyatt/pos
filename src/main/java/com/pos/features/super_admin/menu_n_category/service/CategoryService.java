@@ -92,11 +92,12 @@ public class CategoryService {
     }
 
     public CategoryResponse convertCategoryToRes(Category category) {
+        User createdBy = userService.getUser(category.getCreatedBy().getUserId());
         return new CategoryResponse(
                 category.getCategoryId(),
                 category.getCategoryName(),
                 category.getCreatedDate().toString(),
-                userService.convertUserToUserResponse(category.getCreatedBy()), // ✅ DTO
+                userService.convertUserToUserResponse(createdBy), // ✅ DTO
                 category.getUpdatedDate() != null ? category.getUpdatedDate().toString() : null,
                 category.getUpdatedBy() != null ? userService.convertUserToUserResponse(category.getUpdatedBy()) : null
         );

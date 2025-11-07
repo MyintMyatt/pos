@@ -23,7 +23,7 @@ public class InventoryMovement {
     private Long inventoryMovementId;
 
     @Column(nullable = false)
-    private Double quantityChange;
+    private Integer quantityChange;
 
     @Enumerated(EnumType.STRING)
     private InventoryMovementType inventoryMovementType;

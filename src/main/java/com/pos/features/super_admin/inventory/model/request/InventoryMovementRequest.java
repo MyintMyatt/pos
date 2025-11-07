@@ -21,7 +21,7 @@ public class InventoryMovementRequest {
     private InventoryMovementType movementType;
 
     @Min(value = 0, message = "quantity must not be minus")
-    private double quantity;
+    private Integer quantity;
 
     @NotNull(message = "UOM must not be null")
     private Uom uom;
