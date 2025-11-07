@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
@@ -18,7 +19,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Inventory {
+public class Inventory implements Serializable {
     @Id
     @GeneratedValue(generator = "inventory-id-generator")
     @GenericGenerator(
@@ -45,7 +46,7 @@ public class Inventory {
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
     private User createdBy;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDate updatedDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

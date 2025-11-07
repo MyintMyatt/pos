@@ -19,7 +19,7 @@ public class MenuCreateRequest {
     @NotBlank(message = "menu name must not be empty or null")
     private String menuName;
 
-    @NotBlank(message = "menu price must not be null")
+    @NotNull(message = "menu price must not be null")
     private Double price;
 
     @NotBlank(message = "category id must not be null")
@@ -35,7 +35,7 @@ public class MenuCreateRequest {
     private InventoryMovementType movementType;
 
     @Min(value = 0, message = "quantity must not be minus")
-    private double quantity;
+    private int quantity;
 
     @NotNull(message = "UOM must not be null")
     private Uom uom;

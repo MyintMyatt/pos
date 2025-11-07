@@ -13,7 +13,7 @@ public class InventoryIdGenerator implements IdentifierGenerator {
         String year = String.format("%02d", now.getYear() % 100);
         String month = String.format("%02d", now.getMonthValue());
         String sql = "SELECT inventory_id FROM tbl_inventory ORDER BY inventory_id DESC LIMIT 1";
-        String lastId = session.createNativeQuery(sql).uniqueResult().toString();
+        String lastId = (String) session.createNativeQuery(sql).uniqueResult();
 
         int nextNum = 1;
         if (lastId != null && lastId.length() >= 8){

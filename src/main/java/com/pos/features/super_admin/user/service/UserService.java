@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,17 +62,23 @@ public class UserService {
     @Transactional
     public User getUser(String id){
         User user = userRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("user not found with email " + id));
+                .orElseThrow(() -> new NotFoundException("user not found with id " + id));
         return user;
     }
 
     @Transactional
-    public String login(LoginUserRequest loginObj) {
+    public Map<String, Object> login(LoginUserRequest loginObj) {
+        Map<String, Object> map = new HashMap<>();
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginObj.userEmail(), loginObj.password()));
         if (auth.isAuthenticated()) {
-            return jwtService.generateToken(userRepo.findById(loginObj.userEmail()).get());
+            User user = userRepo.findById(loginObj.userEmail()).get();
+            String token = jwtService.generateToken(user);
+
+            map.put("token", token);
+            map.put("user", user);
+            return map;
         }
-        return "email and password validation error";
+        return (Map<String, Object>) map.put("error", "email and password validation error");
     }
 
     @Transactional

@@ -37,6 +37,7 @@ public class UserController {
     @PostMapping("/register")
 //    @PreAuthorize("hasRole('WRITE')")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userRequest) {
+        System.err.println("User request => " + userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse
                         .builder()

@@ -10,12 +10,19 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MenuRepo extends JpaRepository<MenuItem, String> {
-    @Query("""
-        SELECT m FROM MenuItem m
-        WHERE m.isDeleted = false
-        AND (:keyword IS NULL OR LOWER(m.menuName) LIKE LOWER(CONCAT('%', :keyword, '%')))
-        AND (:categoryId IS NULL OR m.category.categoryId = :categoryId)
-    """)
+    //    @Query("""
+//        SELECT m FROM MenuItem m
+//        WHERE m.isDeleted = false
+//        AND (:keyword IS NULL OR LOWER(m.menuName AS string) LIKE LOWER(CONCAT('%', :keyword, '%')))
+//        AND (:categoryId IS NULL OR m.category.categoryId = :categoryId)
+//    """)
+    @Query(value = """
+                SELECT * FROM tbl_menu_item
+                WHERE is_deleted = false
+                  AND (:keyword IS NULL OR LOWER(menu_name::text) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                  AND (:categoryId IS NULL OR fk_category_id = :categoryId)
+            """,
+            nativeQuery = true)
     Page<MenuItem> searchMenu(
             @Param("keyword") String keyword,
             @Param("categoryId") String categoryId,

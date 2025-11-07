@@ -14,6 +14,8 @@ import com.pos.features.super_admin.menu_n_category.service.MenuService;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,20 +31,18 @@ public class InventoryService {
     private UserService userService;
     private MenuService menuService;
 
-    public InventoryService(InventoryRepository inventoryRepository, InventoryMovementRepository movementRepository, UserService userService, MenuService menuService) {
+    @Autowired
+    public InventoryService(InventoryRepository inventoryRepository, InventoryMovementRepository movementRepository, UserService userService, @Lazy MenuService menuService) {
         this.inventoryRepository = inventoryRepository;
         this.movementRepository = movementRepository;
         this.userService = userService;
         this.menuService = menuService;
     }
 
-    public InventoryService(InventoryRepository inventoryRepository, InventoryMovementRepository movementRepository) {
-        this.inventoryRepository = inventoryRepository;
-        this.movementRepository = movementRepository;
-    }
 
     @Transactional
     public InventoryResponse inventoryMovementControl(InventoryMovementRequest req) {
+        System.err.println("Inventory Movement => " + req);
         // check user is exited or not
         User createdBy = userService.getUser(req.getCreatedBy());
         // check menu is exited or not, i.e. if  menu is deleted, no inventory operation will not be proceeded.
@@ -50,6 +50,12 @@ public class InventoryService {
 
         // check if menu id is exited or not in inventory table
         Inventory inventory = inventoryRepository.findByMenuItem_MenuId(req.getMenuId());
+
+       return inventoryMovementTypeCheck(req, inventory, createdBy, menuItem);
+    }
+
+    @Transactional
+    public InventoryResponse inventoryMovementTypeCheck(InventoryMovementRequest req, Inventory inventory, User createdBy, MenuItem menuItem){
         /*
          * this if condition checks
          * when inventory movement type is SALE or DAMAGE,menu item's inventory must not be null, it must be exited in inventory table
@@ -70,7 +76,6 @@ public class InventoryService {
             }
         }
         return null;
-
     }
 
     @Transactional

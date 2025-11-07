@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
-@EnableCaching
+//@EnableCaching
 @SpringBootApplication
 public class PosApplication {
 

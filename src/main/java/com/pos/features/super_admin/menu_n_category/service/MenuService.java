@@ -30,41 +30,45 @@ import java.util.Locale;
 @Service
 public class MenuService {
 
-    @Autowired
     private MenuRepo menuRepo;
-
-    @Autowired
     private CategoryService categoryService;
-
-    @Autowired
     private UserService userService;
-
-    @Autowired
     private InventoryService inventoryService;
-
-    @Autowired
     private MenuItemDiscountRepository menuItemDiscountRepository;
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @Autowired
+    public MenuService(MenuRepo menuRepo, CategoryService categoryService, UserService userService, InventoryService inventoryService, MenuItemDiscountRepository menuItemDiscountRepository) {
+        this.menuRepo = menuRepo;
+        this.categoryService = categoryService;
+        this.userService = userService;
+        this.inventoryService = inventoryService;
+        this.menuItemDiscountRepository = menuItemDiscountRepository;
+    }
+
+//    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse createMenu(MenuCreateRequest obj) {
         Category c = categoryService.getCategoryObjById(obj.getCategoryId());
-        User u = userService.getUser(obj.getCategoryId());
+        System.err.println("call user");
+        User u = userService.getUser(obj.getCreatedBy());
+        System.err.println("user => " + u.getUserId());
         MenuItem menuItem = menuRepo.save(convertCreateReqToMenu(obj, c, u));
+        System.err.println("success create menu");
         // add stock
-        inventoryService.inventoryMovementControl(
+        inventoryService.inventoryMovementTypeCheck(
                 InventoryMovementRequest.builder()
                         .menuId(menuItem.getMenuId())
                         .movementType(obj.getMovementType())
                         .quantity(obj.getQuantity())
                         .uom(obj.getUom())
-                        .build()
+                        .createdBy(u.getUserName())
+                        .build(), null, u, menuItem
         );
 
         return convertObjToRes(menuItem);
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+//    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj) {
         User updatedBy = userService.getUser(obj.getCategoryId());
@@ -109,25 +113,25 @@ public class MenuService {
         return convertObjToRes(menuRepo.save(menuItem));
     }
 
-//    @Transactional
+    //    @Transactional
 //    public List<MenuResponse> getAllMenu() {
 //        return menuRepo.findAll()
 //                .stream().filter(m -> !m.isDeleted())
 //                .map(this::convertObjToRes)
 //                .toList();
 //    }
-@Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
-@Transactional
-public Page<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
-    Pageable pageable = PageRequest.of(page, size);
-    Page<MenuItem> menuPage = menuRepo.searchMenu(
-            (keyword != null && !keyword.isBlank()) ? keyword : null,
-            (categoryId != null && !categoryId.isBlank()) ? categoryId : null,
-            pageable
-    );
+//    @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
+    @Transactional
+    public Page<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MenuItem> menuPage = menuRepo.searchMenu(
+                (keyword != null && !keyword.isBlank()) ? keyword : null,
+                (categoryId != null && !categoryId.isBlank()) ? categoryId : null,
+                pageable
+        );
 
-    return menuPage.map(this::convertObjToRes);
-}
+        return menuPage.map(this::convertObjToRes);
+    }
 
 
     private MenuItem convertCreateReqToMenu(MenuCreateRequest obj, Category category, User user) {
@@ -163,14 +167,14 @@ public Page<MenuResponse> getAllMenu(int page, int size, String keyword, String 
                 obj.getMenuId(),
                 obj.getMenuName(),
                 obj.getPrice(),
-                obj.getCategory(),
+                categoryService.convertCategoryToRes(obj.getCategory()),
                 obj.getMenuImageUrl(),
                 obj.isThereDiscount(),
                 obj.getDescription(),
                 obj.getCreatedBy(),
-                obj.getCreatedDate(),
+                obj.getCreatedDate().toString(),
                 obj.getUpdatedBy(),
-                obj.getUpdatedDate(),
+                obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null,
                 getDiscountsForMenu(obj)
         );
     }
