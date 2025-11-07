@@ -91,8 +91,15 @@ public class CategoryService {
                 .build();
     }
 
-    public CategoryResponse convertCategoryToRes(Category obj) {
-        return new CategoryResponse(obj.getCategoryId(), obj.getCategoryName(), obj.getCreatedDate().toString(), obj.getCreatedBy().getUserId(),
-                obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null, obj.getUpdatedBy() == null ? null :  obj.getUpdatedBy().getUserId());
+    public CategoryResponse convertCategoryToRes(Category category) {
+        return new CategoryResponse(
+                category.getCategoryId(),
+                category.getCategoryName(),
+                category.getCreatedDate().toString(),
+                userService.convertUserToUserResponse(category.getCreatedBy()), // ✅ DTO
+                category.getUpdatedDate() != null ? category.getUpdatedDate().toString() : null,
+                category.getUpdatedBy() != null ? userService.convertUserToUserResponse(category.getUpdatedBy()) : null
+        );
     }
+
 }

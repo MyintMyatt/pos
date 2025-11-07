@@ -45,15 +45,13 @@ public class MenuService {
         this.menuItemDiscountRepository = menuItemDiscountRepository;
     }
 
-//    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse createMenu(MenuCreateRequest obj) {
         Category c = categoryService.getCategoryObjById(obj.getCategoryId());
-        System.err.println("call user");
         User u = userService.getUser(obj.getCreatedBy());
-        System.err.println("user => " + u.getUserId());
         MenuItem menuItem = menuRepo.save(convertCreateReqToMenu(obj, c, u));
-        System.err.println("success create menu");
+
         // add stock
         inventoryService.inventoryMovementTypeCheck(
                 InventoryMovementRequest.builder()
@@ -65,10 +63,11 @@ public class MenuService {
                         .build(), null, u, menuItem
         );
 
-        return convertObjToRes(menuItem);
+        MenuResponse menuResponse =  convertObjToRes(menuItem);
+        return menuResponse;
     }
 
-//    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj) {
         User updatedBy = userService.getUser(obj.getCategoryId());
@@ -120,7 +119,7 @@ public class MenuService {
 //                .map(this::convertObjToRes)
 //                .toList();
 //    }
-//    @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
+    @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
     @Transactional
     public Page<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
         Pageable pageable = PageRequest.of(page, size);
@@ -129,6 +128,7 @@ public class MenuService {
                 (categoryId != null && !categoryId.isBlank()) ? categoryId : null,
                 pageable
         );
+        System.err.println("menu page => " + menuPage);
 
         return menuPage.map(this::convertObjToRes);
     }
@@ -163,6 +163,7 @@ public class MenuService {
     }
 
     private MenuResponse convertObjToRes(MenuItem obj) {
+        System.err.println("menu itme obj " + obj);
         return new MenuResponse(
                 obj.getMenuId(),
                 obj.getMenuName(),
@@ -171,9 +172,9 @@ public class MenuService {
                 obj.getMenuImageUrl(),
                 obj.isThereDiscount(),
                 obj.getDescription(),
-                obj.getCreatedBy(),
+                userService.convertUserToUserResponse(obj.getCreatedBy()),
                 obj.getCreatedDate().toString(),
-                obj.getUpdatedBy(),
+                obj.getUpdatedBy() != null ? userService.convertUserToUserResponse(obj.getUpdatedBy()) : null,
                 obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null,
                 getDiscountsForMenu(obj)
         );

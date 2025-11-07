@@ -20,7 +20,7 @@ public class UserResponse {
     private String userName;
     private Role role;
     private Set<Permission> permissions;
-    private LocalDate createdDate;
+    private String createdDate;
     private String profileImgUrl;
     private boolean isAccountIsActive;
     private boolean isAccountNotLocked;

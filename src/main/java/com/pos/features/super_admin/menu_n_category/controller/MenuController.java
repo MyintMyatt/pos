@@ -1,11 +1,13 @@
 package com.pos.features.super_admin.menu_n_category.controller;
 
+import com.cloudinary.Api;
 import com.pos.common.model.response.ApiResponse;
 import com.pos.common.service.CloudinaryService;
 import com.pos.constant.InventoryMovementType;
 import com.pos.features.super_admin.menu_n_category.model.request.CategoryUpdateRequest;
 import com.pos.features.super_admin.menu_n_category.model.request.MenuCreateRequest;
 import com.pos.features.super_admin.menu_n_category.model.request.MenuUpdateRequest;
+import com.pos.features.super_admin.menu_n_category.model.response.MenuResponse;
 import com.pos.features.super_admin.menu_n_category.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,14 +55,16 @@ public class MenuController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> createMenu(@Valid @RequestBody MenuCreateRequest obj){
+    public ResponseEntity<ApiResponse<?>> createMenu(@Valid @RequestBody MenuCreateRequest obj){
         if (obj.getMovementType() != InventoryMovementType.RESTOCK) throw new RuntimeException("Movement Type should be RESTOCK for menu creation");
+        MenuResponse menuResponse = menuService.createMenu(obj);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         ApiResponse.builder()
                                 .status(201)
                                 .message("successfully created menu!!")
-                                .data(menuService.createMenu(obj))
+                                .data(menuResponse).build()
                 );
     }
 

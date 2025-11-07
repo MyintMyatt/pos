@@ -69,13 +69,13 @@ public class UserService {
     @Transactional
     public Map<String, Object> login(LoginUserRequest loginObj) {
         Map<String, Object> map = new HashMap<>();
-        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginObj.userEmail(), loginObj.password()));
+        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginObj.userId(), loginObj.password()));
         if (auth.isAuthenticated()) {
-            User user = userRepo.findById(loginObj.userEmail()).get();
+            User user = userRepo.findById(loginObj.userId()).get();
             String token = jwtService.generateToken(user);
 
             map.put("token", token);
-            map.put("user", user);
+            map.put("user", convertUserToUserResponse(user));
             return map;
         }
         return (Map<String, Object>) map.put("error", "email and password validation error");
@@ -108,7 +108,7 @@ public class UserService {
                 .build();
     }
 
-    private UserResponse convertUserToUserResponse(User obj) {
+    public UserResponse convertUserToUserResponse(User obj) {
         return UserResponse.builder()
                 .userId(obj.getUserId())
                 .userEmail(obj.getUserEmail())
@@ -116,7 +116,7 @@ public class UserService {
                 .role(obj.getRole())
                 .permissions(obj.getPermissions())
                 .profileImgUrl(obj.getProfileImgUrl())
-                .createdDate(obj.getCreatedDate())
+                .createdDate(obj.getCreatedDate().toString())
                 .isAccountIsActive(obj.isAccountIsActive())
                 .isAccountNotLocked(obj.isAccountNotLocked())
                 .build();

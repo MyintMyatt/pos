@@ -2,10 +2,7 @@ package com.pos.features.super_admin.menu_n_category.model.entity;
 
 import com.pos.features.super_admin.user.model.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
@@ -14,6 +11,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "tbl_menu_item")
 @Data
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
