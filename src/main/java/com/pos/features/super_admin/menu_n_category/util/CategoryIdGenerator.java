@@ -13,7 +13,7 @@ public class CategoryIdGenerator implements IdentifierGenerator {
         String lastId =(String) session.createNativeQuery(sql).uniqueResult();
 
         int nextNumber = 1;
-        if (lastId != null && lastId.length() >= 5){
+        if (lastId != null && lastId.length() >= 2){
             String numberPart = lastId.substring(1);
             try {
                 nextNumber = Integer.parseInt(numberPart) + 1;

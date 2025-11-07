@@ -47,14 +47,11 @@ public class Tax {
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
     private User createdBy;
 
-    @Column(nullable = false)
-    private LocalDate updatedDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updated_by", referencedColumnName = "user_id",nullable = true)
-    private User updatedBy;
-
-
-
+//
+//    private LocalDate updatedDate;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "updated_by", referencedColumnName = "user_id",nullable = true)
+//    private User updatedBy;
 
 }

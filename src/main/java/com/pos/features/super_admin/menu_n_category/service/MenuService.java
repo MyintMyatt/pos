@@ -1,5 +1,6 @@
 package com.pos.features.super_admin.menu_n_category.service;
 
+import com.pos.common.model.response.PageDTO;
 import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.discount.model.entity.MenuItemDiscount;
 import com.pos.features.super_admin.discount.model.response.MenuItemDiscountResponse;
@@ -67,7 +68,7 @@ public class MenuService {
         return menuResponse;
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+//    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj) {
         User updatedBy = userService.getUser(obj.getCategoryId());
@@ -97,14 +98,14 @@ public class MenuService {
         return convertObjToRes(getMenuItemById(menuId));
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+//    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public void deleteMenu(String menuId) {
         MenuItem menu = getMenuItemById(menuId);
         menuRepo.save(menu);
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+//    @CacheEvict(value = "menuCache", allEntries = true)
     @Transactional
     public MenuResponse updateMenuImage(String menuId, String imageUrl) {
         MenuItem menuItem = getMenuItemById(menuId);
@@ -119,18 +120,27 @@ public class MenuService {
 //                .map(this::convertObjToRes)
 //                .toList();
 //    }
-    @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
+//    @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
     @Transactional
-    public Page<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
+    public PageDTO<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<MenuItem> menuPage = menuRepo.searchMenu(
+//                (keyword != null && !keyword.isBlank()) ? keyword : null,
+//                (categoryId != null && !categoryId.isBlank()) ? categoryId : null,
+//                pageable
+//        );
+//        System.err.println("menu page => " + menuPage);
+//
+//        return menuPage.map(this::convertObjToRes);
         Pageable pageable = PageRequest.of(page, size);
         Page<MenuItem> menuPage = menuRepo.searchMenu(
                 (keyword != null && !keyword.isBlank()) ? keyword : null,
                 (categoryId != null && !categoryId.isBlank()) ? categoryId : null,
                 pageable
         );
-        System.err.println("menu page => " + menuPage);
 
-        return menuPage.map(this::convertObjToRes);
+        List<MenuResponse> content = menuPage.stream().map(this::convertObjToRes).toList();
+        return new PageDTO<>(content, page, size, menuPage.getTotalElements());
     }
 
 
@@ -163,7 +173,6 @@ public class MenuService {
     }
 
     private MenuResponse convertObjToRes(MenuItem obj) {
-        System.err.println("menu itme obj " + obj);
         return new MenuResponse(
                 obj.getMenuId(),
                 obj.getMenuName(),

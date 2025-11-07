@@ -1,6 +1,8 @@
 package com.pos.features.cashier.sale.service;
 
 import com.pos.constant.DiscountType;
+import com.pos.constant.InventoryMovementType;
+import com.pos.constant.Uom;
 import com.pos.features.cashier.sale.model.entity.SaleTaxId;
 import com.pos.features.cashier.sale.model.entity.Sales;
 import com.pos.features.cashier.sale.model.entity.SalesItem;
@@ -15,6 +17,9 @@ import com.pos.features.cashier.sale.repo.SalesTaxRepo;
 import com.pos.features.super_admin.discount.model.entity.Discount;
 import com.pos.features.super_admin.discount.model.entity.MenuItemDiscount;
 import com.pos.features.super_admin.discount.repo.MenuItemDiscountRepository;
+import com.pos.features.super_admin.inventory.model.entity.Inventory;
+import com.pos.features.super_admin.inventory.model.request.InventoryMovementRequest;
+import com.pos.features.super_admin.inventory.service.InventoryService;
 import com.pos.features.super_admin.menu_n_category.model.entity.MenuItem;
 import com.pos.features.super_admin.menu_n_category.service.MenuService;
 import com.pos.features.super_admin.tax.model.entity.Tax;
@@ -22,8 +27,10 @@ import com.pos.features.super_admin.tax.service.TaxService;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,19 +52,25 @@ public class SalesService {
     private MenuService menuService;
     private TaxService taxService;
     private MenuItemDiscountRepository menuItemDiscountRepository;
+    private InventoryService inventoryService;
 
-    public SalesService(SalesRepo salesRepo, UserService userService, MenuService menuService, TaxService taxService, MenuItemDiscountRepository menuItemDiscountRepository) {
+
+    @Autowired
+    public SalesService(InventoryService inventoryService, SalesTaxRepo salesTaxRepo, SalesRepo salesRepo, @Lazy UserService userService,@Lazy MenuService menuService, TaxService taxService, MenuItemDiscountRepository menuItemDiscountRepository,SalesItemRepo salesItemRepo) {
         this.salesRepo = salesRepo;
         this.userService = userService;
         this.menuService = menuService;
         this.taxService = taxService;
         this.menuItemDiscountRepository = menuItemDiscountRepository;
+        this.salesItemRepo = salesItemRepo;
+        this.salesTaxRepo = salesTaxRepo;
+        this.inventoryService = inventoryService;
     }
 
 
     @CacheEvict(value = "salesCache", allEntries = true)
     @Transactional
-    public Sales createSale(SalesRequest request) {
+    public SalesResponse createSale(SalesRequest request) {
         //check user is exited or not
         User createdBy = userService.getUser(request.getUserId());
 
@@ -127,9 +140,23 @@ public class SalesService {
                     .total(itemTotal)
                     .build();
             salesItems.add(salesItem);
+
+            //for inventory
+           Inventory inventory = inventoryService.getInventoryByMenuId(salesItem.getMenuItem().getMenuId());
+           inventoryService.inventoryMovementTypeCheck(
+                   InventoryMovementRequest.builder()
+                           .menuId(salesItem.getMenuItem().getMenuId())
+                           .movementType(InventoryMovementType.SALE)
+                           .quantity(salesItem.getQuantity())
+                           .uom(Uom.Qty)
+                           .createdBy(createdBy.getUserId())
+                           .build()
+                   , inventory,createdBy,menuItem);
+
         }
 
         salesItemRepo.saveAll(salesItems);
+        sales.setSalesItems(salesItems);
 
         // tax
         double totalTaxAmount = 0.0;
@@ -154,11 +181,13 @@ public class SalesService {
             salesTaxRepo.saveAll(salesTaxList);
         }
 
+
+
         sales.setSubTotal(subtotal);
         sales.setTotalAmount(subtotal + totalTaxAmount);
         salesRepo.save(sales);
 
-        return sales;
+        return convertToSalesResponse(sales);
     }
 
     @Cacheable(value = "salesCache", key = "#page + '-' + #size + '-' + #keyword")
@@ -191,13 +220,13 @@ public class SalesService {
 
         return SalesResponse.builder()
                 .salesId(sale.getSalesId())
-                .saleDate(sale.getSaleDate())
+                .saleDate(sale.getSaleDate().toString())
                 .subTotal(sale.getSubTotal())
                 .totalAmount(sale.getTotalAmount())
-                .createdBy(sale.getCreatedBy())
-                .createdDate(sale.getCreatedDate())
-                .updatedBy(sale.getUpdatedBy())
-                .updatedDate(sale.getUpdatedDate())
+                .createdBy(userService.convertUserToUserResponse(sale.getCreatedBy()))
+                .createdDate(sale.getCreatedDate().toString())
+                .updatedBy(sale.getUpdatedBy() != null ? userService.convertUserToUserResponse(sale.getUpdatedBy()): null)
+                .updatedDate(sale.getUpdatedDate() != null ? sale.getUpdatedDate().toString() : null)
                 .items(itemResponses)
                 .build();
     }

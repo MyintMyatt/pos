@@ -55,6 +55,11 @@ public class InventoryService {
     }
 
     @Transactional
+    public Inventory getInventoryByMenuId(String menuId){
+        return inventoryRepository.findByMenuItem_MenuId(menuId);
+    }
+
+    @Transactional
     public InventoryResponse inventoryMovementTypeCheck(InventoryMovementRequest req, Inventory inventory, User createdBy, MenuItem menuItem){
         /*
          * this if condition checks

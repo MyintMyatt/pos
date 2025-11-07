@@ -1,6 +1,7 @@
 package com.pos.features.cashier.sale.model.response;
 
 import com.pos.features.super_admin.user.model.entity.User;
+import com.pos.features.super_admin.user.model.response.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,12 +16,12 @@ import java.util.List;
 @AllArgsConstructor
 public class SalesResponse {
     private String salesId;
-    private LocalDate saleDate;
+    private String saleDate;
     private Double subTotal;
     private Double totalAmount;
-    private User createdBy;
-    private LocalDate createdDate;
-    private User updatedBy;
-    private LocalDate updatedDate;
+    private UserResponse createdBy;
+    private String createdDate;
+    private UserResponse updatedBy;
+    private String updatedDate;
     private List<SalesItemResponse> items;
 }

@@ -47,6 +47,7 @@ public class SaleController {
                                 .status(201)
                                 .message("successfully created sale!!")
                                 .data(salesService.createSale(obj))
+                                .build()
                 );
     }
 

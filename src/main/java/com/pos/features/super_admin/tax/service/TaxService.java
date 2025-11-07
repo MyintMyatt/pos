@@ -83,9 +83,9 @@ public class TaxService {
                 .validFrom(obj.getValidFromDate())
                 .validTo(obj.getValidToDate())
                 .createdDate(obj.getCreatedDate())
-                .createdBy(obj.getCreatedBy())
-                .updatedDate(obj.getUpdatedDate())
-                .updatedBy(obj.getUpdatedBy())
+                .createdBy(userService.convertUserToUserResponse(obj.getCreatedBy()))
+//                .updatedDate(obj.getUpdatedDate())
+//                .updatedBy(obj.getUpdatedBy())
                 .build();
     }
 
@@ -98,8 +98,8 @@ public class TaxService {
                 .validToDate(obj.getValidTo())
                 .createdDate(LocalDate.now())
                 .createdBy(user)
-                .updatedDate(isUpdated ? LocalDate.now() : null)
-                .updatedBy(isUpdated ? user : null)
+//                .updatedDate(isUpdated ? LocalDate.now() : null)
+//                .updatedBy(isUpdated ? user : null)
                 .build();
     }
 }
