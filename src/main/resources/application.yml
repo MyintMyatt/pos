@@ -7,19 +7,19 @@ spring:
       password: hello
 #  config:
 #    import: vault://
-#  cloud:
-#    vault:
-#      uri: http://127.0.0.1:8200
-#      token: root
-#      kv:
-#        enabled: true
-#        application-name: pos
-#        backend: secret
-#        default-context: pos
-#        engine-version: 2
-#        config:
-#          lifecycle:
-#            enabled: true
+  cloud:
+    vault:
+      uri: http://127.0.0.1:8200
+      token: root
+      kv:
+        enabled: true
+        application-name: pos
+        backend: secret
+        default-context: pos
+        engine-version: 2
+        config:
+          lifecycle:
+            enabled: true
 #  datasource:
 #    url: ${db-url}
 #    username: ${db-username}
@@ -28,8 +28,8 @@ spring:
   redis:
     host: localhost
     port: 6379
-    password: password
-    client-type: lettuce
+#    password: password
+#    client-type: lettuce
 
   datasource:
     url: jdbc:postgresql://ep-noisy-flower-a1y0y3v1-pooler.ap-southeast-1.aws.neon.tech/orion #jdbc:postgresql://pg-3cdc012-lwinthein679-8217.l.aivencloud.com:28941/orion
