@@ -46,7 +46,7 @@ public class InventoryService {
         this.menuService = menuService;
     }
 
-    @CacheEvict(value = "InvMovement")
+    @CacheEvict(value = "InvMovement",  allEntries = true)
     @Transactional
     public InventoryResponse inventoryMovementControl(InventoryMovementRequest req) {
         System.err.println("Inventory Movement => " + req);
@@ -81,13 +81,13 @@ public class InventoryService {
         );
     }
 
-    @CacheEvict(value = "InvMovement")
+    @CacheEvict(value = "InvMovement",  allEntries = true)
     @Transactional
     public Inventory getInventoryByMenuId(String menuId){
         return inventoryRepository.findByMenuItem_MenuId(menuId);
     }
 
-    @CacheEvict(value = "InvMovement")
+    @CacheEvict(value = "InvMovement",  allEntries = true)
     @Transactional
     public InventoryResponse inventoryMovementTypeCheck(InventoryMovementRequest req, Inventory inventory, User createdBy, MenuItem menuItem){
         /*

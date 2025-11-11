@@ -5,6 +5,7 @@ import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.discount.model.entity.MenuItemDiscount;
 import com.pos.features.super_admin.discount.model.response.MenuItemDiscountResponse;
 import com.pos.features.super_admin.discount.repo.MenuItemDiscountRepository;
+import com.pos.features.super_admin.inventory.model.entity.Inventory;
 import com.pos.features.super_admin.inventory.model.request.InventoryMovementRequest;
 import com.pos.features.super_admin.inventory.service.InventoryService;
 import com.pos.features.super_admin.menu_n_category.model.entity.Category;
@@ -173,6 +174,7 @@ public class MenuService {
     }
 
     public MenuResponse convertObjToRes(MenuItem obj) {
+        Inventory inventory = inventoryService.getInventoryByMenuId(obj.getMenuId());
         return new MenuResponse(
                 obj.getMenuId(),
                 obj.getMenuName(),
@@ -185,7 +187,7 @@ public class MenuService {
                 obj.getCreatedDate().toString(),
                 obj.getUpdatedBy() != null ? userService.convertUserToUserResponse(obj.getUpdatedBy()) : null,
                 obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null,
-                inventoryService.convertObjToInvCustomRes(obj.getInventory()),
+                inventoryService.convertObjToInvCustomRes(inventory),
                 getDiscountsForMenu(obj)
         );
     }

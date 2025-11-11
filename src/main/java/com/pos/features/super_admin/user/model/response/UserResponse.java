@@ -1,5 +1,6 @@
 package com.pos.features.super_admin.user.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pos.constant.Permission;
 import com.pos.constant.Role;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ public class UserResponse {
     private String userEmail;
     private String userName;
     private Role role;
+//    @JsonIgnore
     private Set<Permission> permissions;
     private String createdDate;
     private String profileImgUrl;

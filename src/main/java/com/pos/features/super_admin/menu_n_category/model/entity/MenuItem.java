@@ -39,9 +39,8 @@ public class MenuItem implements Serializable {
 
     private String menuImageUrl;
 
-    @OneToOne
-    @JoinColumn(name = "fk_inventory_id", referencedColumnName = "inventory_id")
-    private Inventory inventory;
+//    @OneToOne(mappedBy = "menuItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private Inventory inventory;
 
     @Column(nullable = false)
     private boolean isThereDiscount;

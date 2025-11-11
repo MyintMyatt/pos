@@ -52,7 +52,7 @@ public class InventoryController {
 
     @GetMapping
     public ResponseEntity<?> getAllInventroyMovement(){
-        return ResponseEntity.ok(
+        return ResponseEntity.status(200).body(
                 ApiResponse.builder()
                         .status(200)
                         .message("all inventory movement")
