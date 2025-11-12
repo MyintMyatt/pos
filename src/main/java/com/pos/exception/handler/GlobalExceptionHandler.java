@@ -1,8 +1,8 @@
 package com.pos.exception.handler;
 
-import com.pos.common.ApiResponse;
+import com.pos.common.model.response.ApiResponse;
 import com.pos.exception.UserAlreadyExitedException;
-import com.pos.exception.UserNotFoundException;
+import com.pos.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ApiResponse<?>> userNotFoundException(UserNotFoundException e) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiResponse<?>> userNotFoundException(NotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.builder()
                         .status(HttpStatus.NOT_FOUND.value())

@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: pos
+  security:
+    user:
+      name: orion
+      password: hello
+  #  config:
+  #    import: vault://
+  cloud:
+    vault:
+      uri: http://127.0.0.1:8200
+      token: root
+      kv:
+        enabled: true
+        application-name: pos
+        backend: secret
+        default-context: pos
+        engine-version: 2
+        config:
+          lifecycle:
+            enabled: true
+    datasource:
+      url: ${db-url}
+      username: ${db-username}
+      password: ${db-password}
+      driver-class-name: org.postgresql.Driver
+  redis:
+    host: localhost
+    port: 6379
+  #    password: password
+  #    client-type: lettuce
+
+#  datasource:
+#    url: jdbc:postgresql://ep-noisy-flower-a1y0y3v1-pooler.ap-southeast-1.aws.neon.tech/orion #jdbc:postgresql://pg-3cdc012-lwinthein679-8217.l.aivencloud.com:28941/orion
+#    username: neondb_owner #avnadmin
+#    password: npg_BpL98UEaYWJH #AVNS_cxuvE6CJOALurLRYwjv
+#    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+springdoc:
+  swagger-ui:
+    path: /api-doc
+#custom value
+default:
+  user:
+    profile:
+      image: https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png
+
+frontend:
+  url: http://localhost:5173
+
+jwt:
+  key: 0b1ac160f2abb47ca5a5de8cfe139586b55db5cc6974837979d42366a67b9e89aceae2639005059e277243c81239f8be299f453c4d8e36a21a8fe3e36df1e90b
+
+cloudinary:
+  cloud:
+    name: dsyj1lgo4
+  api:
+    key: 178224993461218
+    secret: NxIhumjy6Ils81dIJeig7n3qXUI
+  menu:
+    image:
+      folder-name: menu-image
+
