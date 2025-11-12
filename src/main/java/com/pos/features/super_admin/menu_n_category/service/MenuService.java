@@ -185,7 +185,8 @@ public class MenuService {
                 obj.getCreatedDate().toString(),
                 obj.getUpdatedBy() != null ? userService.convertUserToUserResponse(obj.getUpdatedBy()) : null,
                 obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null,
-                inventoryService.convertObjToInvCustomRes(obj.getInventory()),
+//                inventoryService.convertObjToInvCustomRes(obj.getInventory()),
+                null,
                 getDiscountsForMenu(obj)
         );
     }

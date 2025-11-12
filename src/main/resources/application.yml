@@ -5,8 +5,8 @@ spring:
     user:
       name: orion
       password: hello
-#  config:
-#    import: vault://
+  config:
+    import: vault://
   cloud:
     vault:
       uri: http://127.0.0.1:8200
