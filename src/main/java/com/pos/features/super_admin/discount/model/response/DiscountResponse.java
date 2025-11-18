@@ -2,7 +2,7 @@ package com.pos.features.super_admin.discount.model.response;
 
 
 import com.pos.constant.DiscountType;
-import com.pos.features.super_admin.user.model.entity.User;
+import com.pos.features.super_admin.user.model.response.UserSimpleResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +22,8 @@ public class DiscountResponse {
     private LocalDate validFrom;
     private LocalDate validTo;
     private LocalDate createdDate;
-    private User createdBy;
+    private UserSimpleResponse createdBy;
     private LocalDate updatedDate;
-    private User updatedBy;
+    private UserSimpleResponse updatedBy;
 
 }

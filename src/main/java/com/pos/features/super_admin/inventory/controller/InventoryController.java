@@ -22,7 +22,6 @@ public class InventoryController {
         this.inventoryService = inventoryService;
     }
 
-
     @Operation(
             summary = "inventory control",
             description = "inventory movement control for sale, restock, and damage",

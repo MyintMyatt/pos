@@ -72,9 +72,11 @@ public class InventoryService {
         * */
         MenuItem menuItem = menuService.getMenuItemById(req.getMenuId());
 
-        // check if menu id is exited or not in inventory table
+        /*
+        * @ check if menu id is exited or not in inventory table
+        * */
         Inventory inventory = inventoryRepository.findByMenuItem_MenuId(req.getMenuId());
-
+        if (inventory == null) throw new NotFoundException("Inventory not with this menu id : " + req.getMenuId());
        return inventoryMovementTypeCheck(req, inventory, currentUser, menuItem);
     }
 

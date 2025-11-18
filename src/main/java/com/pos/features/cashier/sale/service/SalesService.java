@@ -118,9 +118,9 @@ public class SalesService {
                             && LocalDate.now().isBefore(discount.getValidTo().plusDays(1));
 
                     if (valid) {
-                        if (discount.getDiscountType() == DiscountType.percentage) {
+                        if (discount.getDiscountType() == DiscountType.PERCENTAGE) {
                             discountAmount = originalPrice * (discount.getDiscountValue() / 100.0);
-                        } else if (discount.getDiscountType() == DiscountType.amount) {
+                        } else if (discount.getDiscountType() == DiscountType.AMOUNT) {
                             discountAmount = discount.getDiscountValue();
                         }
                         finalPrice = originalPrice - discountAmount;
@@ -189,20 +189,7 @@ public class SalesService {
         return convertToSalesResponse(sales);
     }
 
-    //    @Cacheable(value = "salesCache", key = "#page + '-' + #size + '-' + #keyword")
-//    @Transactional
-//    public Page<SalesResponse> getAllSales(int page, int size, String keyword) {
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Page<Sales> salesPage;
-//        if (keyword != null && !keyword.isEmpty()) {
-//            salesPage = salesRepo.searchSales(keyword, pageable); // <-- JPQL query
-//        } else {
-//            salesPage = salesRepo.findAll(pageable);
-//        }
-//
-//        return salesPage.map(this::convertToSalesResponse);
-//    }
+
     @Cacheable(value = "salesCache", key = "#page + '-' + #size + '-' + #keyword + '-' + (#startDate != null ? #startDate.toString() : '') + '-' + (#endDate != null ? #endDate.toString() : '')")
     @Transactional(readOnly = true)
     public PageDTO<SalesResponse> getAllSales(int page, int size, String keyword, LocalDate startDate, LocalDate endDate) {
@@ -218,8 +205,6 @@ public class SalesService {
         }
         List<SalesResponse> content = salesPage.stream().map(this::convertToSalesResponse).toList();
         return new PageDTO<>(content, page, size, salesPage.getTotalElements(),salesPage.getTotalPages());
-
-        // return salesPage.map(this::convertToSalesResponse);
     }
 
 

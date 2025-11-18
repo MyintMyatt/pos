@@ -29,6 +29,4 @@ public class DiscountRequest {
     @NotNull(message = "discount valid to date is required")
     private LocalDate validTo;
 
-    @NotNull(message = "discount creator is required")
-    private String userId;
 }
