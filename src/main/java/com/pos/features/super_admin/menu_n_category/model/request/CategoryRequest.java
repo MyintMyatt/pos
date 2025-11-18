@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryCreateRequest {
+public class CategoryRequest {
 
     @NotBlank(message = "category name must not be empty or null")
     private String categoryName;

@@ -38,6 +38,5 @@ public class InventoryMovement {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
     private User createdBy;
-
-
+    
 }

@@ -20,9 +20,9 @@ public class SecurityUserDetailService implements UserDetailsService {
     private UserRepo userRepo;
 
     @Override
-    public UserDetails loadUserByUsername(String userEmail) throws UsernameNotFoundException {
-       User user = userRepo.findById(userEmail)
-                .orElseThrow(() -> new NotFoundException("User not found with email " + userEmail));
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+       User user = userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with email " + userId));
 
        /*add permissions */
         Set<SimpleGrantedAuthority> authorities = user.getPermissions()
@@ -34,7 +34,7 @@ public class SecurityUserDetailService implements UserDetailsService {
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
         return new org.springframework.security.core.userdetails.User(
-                user.getUserEmail(),
+                user.getUserId(),
                 user.getPassword(),
                 user.isEnabled(),
                 user.isAccountIsActive(),

@@ -150,7 +150,6 @@ public class SalesService {
                             .movementType(InventoryMovementType.SALE)
                             .quantity(salesItem.getQuantity())
                             .uom(Uom.Qty)
-                            .createdBy(createdBy.getUserId())
                             .build()
                     , inventory, createdBy, menuItem);
 

@@ -30,7 +30,8 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String token = null;
-        String userEmail = null;
+        String userId = null;
+        System.err.println("authHeader => " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")){
             filterChain.doFilter(request,response);
@@ -39,10 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             token = authHeader.substring(7);
-            userEmail = jwtService.extractUserEmail(token);
-
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = context.getBean(SecurityUserDetailService.class).loadUserByUsername(userEmail);
+            userId = jwtService.extractUserId(token);
+            System.err.println("User id => " + userId);
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = context.getBean(SecurityUserDetailService.class).loadUserByUsername(userId);
                 if (jwtService.validateToken(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -51,9 +52,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
+            response.getWriter().write("{\"error\": \"Invalid or expired token\"}" + e.getMessage());
         }
     }
 }

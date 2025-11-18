@@ -1,9 +1,7 @@
 package com.pos.features.super_admin.menu_n_category.controller;
 
 import com.pos.common.model.response.ApiResponse;
-import com.pos.features.super_admin.discount.model.request.DiscountRequest;
-import com.pos.features.super_admin.menu_n_category.model.request.CategoryCreateRequest;
-import com.pos.features.super_admin.menu_n_category.model.request.CategoryUpdateRequest;
+import com.pos.features.super_admin.menu_n_category.model.request.CategoryRequest;
 import com.pos.features.super_admin.menu_n_category.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +26,7 @@ public class CategoryController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "category request",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = CategoryCreateRequest.class))
+                    content = @Content(schema = @Schema(implementation = CategoryRequest.class))
             ),
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201",description = "successfully created new category!!"),
@@ -36,7 +34,7 @@ public class CategoryController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> createCategory(@RequestBody CategoryCreateRequest obj){
+    public ResponseEntity<?> createCategory(@RequestBody CategoryRequest obj){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         ApiResponse.builder()
@@ -98,7 +96,7 @@ public class CategoryController {
                     required = true,
                     content = {
                             @Content(schema = @Schema(implementation = String.class)),
-                            @Content(schema = @Schema(implementation = CategoryUpdateRequest.class)),
+                            @Content(schema = @Schema(implementation = CategoryRequest.class)),
                     }
             ),
             responses = {
@@ -108,7 +106,7 @@ public class CategoryController {
     )
 
     @PutMapping("/{categoryId}")
-    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("categoryId") String categoryId, @RequestBody CategoryUpdateRequest obj) {
+    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("categoryId") String categoryId, @RequestBody CategoryRequest obj) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.builder()
                         .status(200)

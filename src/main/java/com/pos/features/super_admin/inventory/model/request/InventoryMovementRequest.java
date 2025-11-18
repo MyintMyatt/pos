@@ -26,7 +26,4 @@ public class InventoryMovementRequest {
     @NotNull(message = "UOM must not be null")
     private Uom uom;
 
-    @NotBlank(message = "created by (user_id) must not be null or empty")
-    private String createdBy;
-
 }

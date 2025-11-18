@@ -116,7 +116,7 @@ public class UserService {
                 .role(obj.getRole())
                 .permissions(permissions)
                 .profileImgUrl(obj.getProfileImgUrl())
-                .createdDate(obj.getCreatedDate().toString())
+                .createdDate(obj.getCreatedDate())
                 .isAccountIsActive(obj.isAccountIsActive())
                 .isAccountNotLocked(obj.isAccountNotLocked())
                 .build();

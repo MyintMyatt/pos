@@ -131,16 +131,16 @@ public class MenuItemDiscountService {
 
     private MenuItemDiscountResponse convertToResponse(MenuItemDiscount obj) {
         return MenuItemDiscountResponse.builder()
-                .id(obj.getId())
-                .menuId(obj.getMenuItem().getMenuId())
-                .menuName(obj.getMenuItem().getMenuName())
+//                .id(obj.getId())
+//                .menuId(obj.getMenuItem().getMenuId())
+//                .menuName(obj.getMenuItem().getMenuName())
                 .discountId(obj.getDiscount().getDiscountId())
                 .discountType(obj.getDiscount().getDiscountType().name())
                 .discountValue(obj.getDiscount().getDiscountValue())
                 .validFrom(obj.getDiscount().getValidFrom())
                 .validTo(obj.getDiscount().getValidTo())
-                .createdDate(obj.getCreatedDate())
-                .createdBy(obj.getCreatedBy().getUserName())
+//                .createdDate(obj.getCreatedDate())
+//                .createdBy(obj.getCreatedBy().getUserName())
                 .build();
     }
 }
