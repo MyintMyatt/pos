@@ -16,11 +16,11 @@ import java.util.List;
 @AllArgsConstructor
 public class SalesRequest {
 
-    @NotNull(message = "creator is required")
-    private String userId;
+//    @NotNull(message = "creator is required")
+//    private String userId;
 
-    @NotNull(message = "Sale date is required")
-    private LocalDate saleDate;
+//    @NotNull(message = "Sale date is required")
+//    private LocalDate saleDate;
 
     @NotNull(message = "Items list cannot be null")
     @Size(min = 1, message = "At least one item is required")

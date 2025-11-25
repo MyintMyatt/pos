@@ -147,7 +147,7 @@
 							<artifactId>lombok</artifactId>
                             <version>1.18.32</version>
 						</path>
-                        <path>
+                        <path>  
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
                             <version>1.6.3</version>

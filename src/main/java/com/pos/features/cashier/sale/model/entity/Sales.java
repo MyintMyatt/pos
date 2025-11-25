@@ -40,6 +40,9 @@ public class Sales {
     @OneToMany(mappedBy = "sales", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SalesItem> salesItems;
 
+    @OneToMany(mappedBy = "sales", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<SalesTax> saleTax;
+
     @Column(nullable = false)
     private LocalDate createdDate;
 

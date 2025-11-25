@@ -20,9 +20,9 @@ public class SalesItemRequest {
     @NotNull(message = "quantity must not be null")
     private Integer quantity;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "price amount cannot be negative")
-    @NotNull(message = "price must not be null")
-    private Double price;
+//    @DecimalMin(value = "0.0", inclusive = true, message = "price amount cannot be negative")
+//    @NotNull(message = "price must not be null")
+//    private Double price;
 
 //    @DecimalMin(value = "0.0", inclusive = true, message = "Total amount cannot be negative")
 //    @NotNull(message = "total amount must not be null")

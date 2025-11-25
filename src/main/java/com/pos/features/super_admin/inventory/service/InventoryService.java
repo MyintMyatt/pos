@@ -100,8 +100,9 @@ public class InventoryService {
     @Transactional
     public InventoryResponse inventoryMovementTypeCheck(InventoryMovementRequest req, Inventory inventory, User currentUser, MenuItem menuItem){
         /*
-         * this if condition checks
-         * when inventory movement type is SALE or DAMAGE,menu item's inventory must not be null, it must be exited in inventory table
+         *
+         *@ this if condition checks
+         *@ when inventory movement type is SALE or DAMAGE,menu item's inventory must not be null, it must be exited in inventory table
          *
          * */
         if (req.getMovementType() != InventoryMovementType.RESTOCK && inventory == null)
