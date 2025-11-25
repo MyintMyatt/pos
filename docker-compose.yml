@@ -1,33 +1,33 @@
 version: '3.8'
 
 services:
-  vault:
-    image: vault:1.13.3
-    container_name: vault-server
-    ports:
-      - "8200:8200"
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: root
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - ./vault/config:/vault/config
-      - ./vault/data:/vault/data
-      - ./vault/logs:/vault/logs
-    restart: always
-
-  vault-init:
-    build:
-      context: ./vault
-      dockerfile: Dockerfile
-    container_name: vault-init
-    depends_on:
-      - vault
-    environment:
-      - VAULT_ADDR=http://vault:8200
-      - VAULT_TOKEN=root
-    entrypoint: ["/bin/sh", "/init.sh"]
+#  vault:
+#    image: vault:1.13.3
+#    container_name: vault-server
+#    ports:
+#      - "8200:8200"
+#    environment:
+#      VAULT_DEV_ROOT_TOKEN_ID: root
+#      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+#    cap_add:
+#      - IPC_LOCK
+#    volumes:
+#      - ./vault/config:/vault/config
+#      - ./vault/data:/vault/data
+#      - ./vault/logs:/vault/logs
+#    restart: always
+#
+#  vault-init:
+#    build:
+#      context: ./vault
+#      dockerfile: Dockerfile
+#    container_name: vault-init
+#    depends_on:
+#      - vault
+#    environment:
+#      - VAULT_ADDR=http://vault:8200
+#      - VAULT_TOKEN=root
+#    entrypoint: ["/bin/sh", "/init.sh"]
 
   redis:
     image: redis:latest
@@ -42,22 +42,22 @@ services:
     environment:
       - REDIS_PASSWORD=password
 
-#  pos-app:
-#    build: .
-#    container_name: pos-app
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - redis
-#    environment:
-#      - SERVER_ADDRESS=0.0.0.0
-#      - SPRING_CLOUD_VAULT_URI=http://vault:8200
-#      - SPRING_CLOUD_VAULT_TOKEN=root
-#      - SPRING_DATA_REDIS_HOST=redis
-#      - SPRING_DATA_REDIS_PORT=6379
-##    network_mode: host
-#    networks:
-#      - default
+  pos-app:
+    build: .
+    container_name: pos-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - SERVER_ADDRESS=0.0.0.0
+      - SPRING_CLOUD_VAULT_URI=http://vault:8200
+      - SPRING_CLOUD_VAULT_TOKEN=root
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+#    network_mode: host
+    networks:
+      - default
 
 volumes:
   redis_data:
