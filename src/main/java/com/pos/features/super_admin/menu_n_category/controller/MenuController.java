@@ -82,7 +82,9 @@ public class MenuController {
                 .body(ApiResponse.builder()
                         .status(200)
                         .message("successfully uploaded image")
-                        .data(map.get("url")));
+                        .data(map.get("url"))
+                        .build()
+                );
     }
 
 
