@@ -77,6 +77,7 @@ public class MenuController {
     @PostMapping("/image-upload/{menuId}")
     public ResponseEntity<?> uploadMenuImage(@PathVariable(name = "menuId") String menuId, @RequestParam("file") MultipartFile file) {
         java.util.Map map = cloudinaryService.uploadFile(file, menuImageFolderName);
+        System.err.println("call");
         menuService.updateMenuImage(menuId, map.get("url").toString());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.builder()

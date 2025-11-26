@@ -33,15 +33,15 @@ public class GlobalExceptionHandler {
 
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<ApiResponse<String>> globalExceptionHandler(Exception e) {
-//        return ResponseEntity.status(500)
-//                .body(
-//                        ApiResponse.<String>builder()
-//                                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-//                                .message("Internal server error")
-//                                .data(e.getMessage())
-//                                .build()
-//                );
-//    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<String>> globalExceptionHandler(Exception e) {
+        return ResponseEntity.status(500)
+                .body(
+                        ApiResponse.<String>builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                                .message("Internal server error")
+                                .data(e.getMessage())
+                                .build()
+                );
+    }
 }

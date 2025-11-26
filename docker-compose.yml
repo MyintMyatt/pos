@@ -42,22 +42,22 @@ services:
     environment:
       - REDIS_PASSWORD=password
 
-  pos-app:
-    build: .
-    container_name: pos-app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - redis
-    environment:
-      - SERVER_ADDRESS=0.0.0.0
-      - SPRING_CLOUD_VAULT_URI=http://vault:8200
-      - SPRING_CLOUD_VAULT_TOKEN=root
-      - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=6379
-#    network_mode: host
-    networks:
-      - default
+#  pos-app:
+#    build: .
+#    container_name: pos-app
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - redis
+#    environment:
+#      - SERVER_ADDRESS=0.0.0.0
+#      - SPRING_CLOUD_VAULT_URI=http://vault:8200
+#      - SPRING_CLOUD_VAULT_TOKEN=root
+#      - SPRING_DATA_REDIS_HOST=redis
+#      - SPRING_DATA_REDIS_PORT=6379
+##    network_mode: host
+#    networks:
+#      - default
 
 volumes:
   redis_data:

@@ -62,7 +62,7 @@ public class MenuService {
 //        this.menuItemGenerator = menuItemGenerator;
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
     public MenuResponse createMenu(MenuRequest request) {
         // check category and user that are invalid or not
@@ -104,7 +104,7 @@ public class MenuService {
         return  menuMapper.toFullResponse(savedResult);
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
     public MenuResponse updateMenu(String menuId, MenuRequest request) {
 
@@ -180,7 +180,7 @@ public class MenuService {
         return menuMapper.toFullResponse(getMenuItemById(menuId));
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
     public void deleteMenu(String menuId) {
         String currentLoginUserId = securityService.getCurrentLoginUserId();
@@ -193,7 +193,7 @@ public class MenuService {
         menuRepo.save(menu);
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
     public MenuResponse updateMenuImage(String menuId, String imageUrl) {
         MenuItem menuItem = getMenuItemById(menuId);

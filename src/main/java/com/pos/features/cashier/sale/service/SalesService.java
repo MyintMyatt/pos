@@ -56,7 +56,7 @@ public class SalesService {
     private final SecurityService securityService;
     private final SaleMapper saleMapper;
 
-    @CacheEvict(value = {"menuCache", "salesCache"}, allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
     public SalesResponse createSale(SalesRequest request) {
         /*
