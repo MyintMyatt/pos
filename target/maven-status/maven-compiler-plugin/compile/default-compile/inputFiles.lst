@@ -59,6 +59,7 @@ D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\p
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\inventory\model\response\InventoryMovementResponse.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\inventory\model\response\InventoryResponse.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\inventory\model\response\InventorySimpleResponse.java
+D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\inventory\model\response\InventorySimpleResponseWithMenu.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\inventory\repo\InventoryMovementRepository.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\inventory\repo\InventoryRepository.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\inventory\service\InventoryService.java

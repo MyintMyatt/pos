@@ -66,6 +66,7 @@ com\pos\common\model\response\PageDTO.class
 com\pos\features\super_admin\tax\model\response\TaxSimpleResponse.class
 com\pos\features\super_admin\discount\model\entity\MenuItemDiscount.class
 com\pos\features\super_admin\discount\model\request\DiscountRequest$DiscountRequestBuilder.class
+com\pos\features\super_admin\inventory\model\response\InventorySimpleResponseWithMenu.class
 com\pos\features\cashier\sale\util\SaleMapper.class
 com\pos\features\super_admin\discount\model\request\MenuItemDiscountRequest$MenuItemDiscountRequestBuilder.class
 com\pos\features\super_admin\menu_n_category\model\request\CategoryRequest.class
