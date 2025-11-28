@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,6 +37,7 @@ public class InventoryController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "internal server error")
             }
     )
+    @PreAuthorize("hasRole('CREATE')")
     @PostMapping
     public ResponseEntity<?> controlInventoryMovement(@Valid @RequestBody InventoryMovementRequest request) {
         return ResponseEntity
@@ -48,7 +50,7 @@ public class InventoryController {
                                 .build()
                 );
     }
-
+    @PreAuthorize("hasRole('READ')")
     @GetMapping
     public ResponseEntity<?> getAllInventroyMovement(){
         return ResponseEntity.status(200).body(

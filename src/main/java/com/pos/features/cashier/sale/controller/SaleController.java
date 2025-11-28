@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -41,6 +42,7 @@ public class SaleController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
             }
     )
+    @PreAuthorize("hasRole('CREATE')")
     @PostMapping
     public ResponseEntity<?> createSale(@Valid @RequestBody SalesRequest obj){
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,7 +55,6 @@ public class SaleController {
                 );
     }
 
-    @GetMapping
     @Operation(
             summary = "Get all sales",
             description = "Retrieve all sales with pagination and optional keyword search by sales ID or creator name",
@@ -87,6 +88,8 @@ public class SaleController {
                     )
             }
     )
+    @PreAuthorize("hasRole('READ')")
+    @GetMapping
     public ResponseEntity<ApiResponse<?>> getAllSales(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,8 +35,8 @@ public class UserController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
             }
     )
+    @PreAuthorize("hasRole('WRITE')")
     @PostMapping("/register")
-//    @PreAuthorize("hasRole('WRITE')")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userRequest) {
         System.err.println("User request => " + userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -56,6 +57,7 @@ public class UserController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
             }
     )
+    @PreAuthorize("hasRole('READ')")
     @GetMapping
     public ResponseEntity<ApiResponse<?>> getAllUsers() {
         return ResponseEntity.status(200).body(
@@ -79,6 +81,7 @@ public class UserController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "user not found")
             }
     )
+    @PreAuthorize("hasRole('READ')")
     @GetMapping("/{user-id}")
     public ResponseEntity<ApiResponse<Object>> getUserByEmail(@PathVariable("user-id") String userId) {
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -105,6 +108,7 @@ public class UserController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
             }
     )
+    @PreAuthorize("hasRole('UPDATE')")
     @PutMapping("/{user-id}")
     public ResponseEntity<ApiResponse<?>> updateUser(@PathVariable("user-id") String userId, @RequestBody UserRequest obj) {
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -129,6 +133,7 @@ public class UserController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "user not found")
             }
     )
+    @PreAuthorize("hasAnyAuthority('UPDATE', 'CREATE')")
     @PutMapping("/is-disabled/{user-id}")
     public ResponseEntity<ApiResponse<?>> disableOrEnableUser(@PathVariable("user-id") String userId) {
         return ResponseEntity.status(200)
@@ -153,6 +158,7 @@ public class UserController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "user not found")
             }
     )
+    @PreAuthorize("hasRole('DELETE')")
     @DeleteMapping("/{user-id}")
     public ResponseEntity<ApiResponse<?>> deleteUser(@PathVariable("user-id") String userId) {
         userService.deleteUser(userId);
