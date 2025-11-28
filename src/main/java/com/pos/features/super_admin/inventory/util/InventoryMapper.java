@@ -6,6 +6,8 @@ import com.pos.features.super_admin.inventory.model.entity.InventoryMovement;
 import com.pos.features.super_admin.inventory.model.response.InventoryMovementResponse;
 import com.pos.features.super_admin.inventory.model.response.InventoryResponse;
 import com.pos.features.super_admin.inventory.model.response.InventorySimpleResponse;
+import com.pos.features.super_admin.inventory.model.response.InventorySimpleResponseWithMenu;
+import com.pos.features.super_admin.menu_n_category.model.response.MenuSimpleResponse;
 import com.pos.features.super_admin.menu_n_category.util.MenuMapper;
 import com.pos.features.super_admin.user.util.UserMapper;
 import org.mapstruct.Mapper;
@@ -31,9 +33,10 @@ public interface InventoryMapper {
 
     @Named("toSimpleInvResponse")
     @Mapping(target = "inventoryId", source = "inventoryId")
+    @Mapping(target = "menu",source = "menuItem", qualifiedByName = "toSimpleMenuResponse")
     @Mapping(target = "quantity", source = "quantity")
     @Mapping(target = "uom", source = "uom")
-    InventorySimpleResponse toSimpleResponse(Inventory inventory);
+    InventorySimpleResponseWithMenu toSimpleResponse(Inventory inventory);
 //    @Mapping(target = "menuItem", ignore = true)
 //    @Mapping(target = "createdDate", ignore = true)
 //    @Mapping(target = "createdBy", ignore = true)
@@ -48,5 +51,8 @@ public interface InventoryMapper {
     @Mapping(target = "createdDate", source = "createdDate")
     @Mapping(target = "createdBy", qualifiedByName = "toSimpleUserResponse")
     InventoryMovementResponse toFullInvMovementResponse(InventoryMovement inventoryMovement);
+
+
+
 
 }

@@ -6,7 +6,7 @@ import com.pos.features.super_admin.inventory.model.entity.Inventory;
 import com.pos.features.super_admin.inventory.model.entity.InventoryMovement;
 import com.pos.features.super_admin.inventory.model.response.InventoryMovementResponse;
 import com.pos.features.super_admin.inventory.model.response.InventoryResponse;
-import com.pos.features.super_admin.inventory.model.response.InventorySimpleResponse;
+import com.pos.features.super_admin.inventory.model.response.InventorySimpleResponseWithMenu;
 import com.pos.features.super_admin.menu_n_category.model.response.MenuSimpleResponse;
 import com.pos.features.super_admin.menu_n_category.util.MenuMapper;
 import com.pos.features.super_admin.user.model.response.UserSimpleResponse;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-26T15:03:35+0630",
+    date = "2025-11-28T13:35:44+0630",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
@@ -60,22 +60,24 @@ public class InventoryMapperImpl implements InventoryMapper {
     }
 
     @Override
-    public InventorySimpleResponse toSimpleResponse(Inventory inventory) {
+    public InventorySimpleResponseWithMenu toSimpleResponse(Inventory inventory) {
         if ( inventory == null ) {
             return null;
         }
 
         String inventoryId = null;
+        MenuSimpleResponse menu = null;
         Integer quantity = null;
         Uom uom = null;
 
         inventoryId = inventory.getInventoryId();
+        menu = menuMapper.toSimpleResponse( inventory.getMenuItem() );
         quantity = inventory.getQuantity();
         uom = inventory.getUom();
 
-        InventorySimpleResponse inventorySimpleResponse = new InventorySimpleResponse( inventoryId, quantity, uom );
+        InventorySimpleResponseWithMenu inventorySimpleResponseWithMenu = new InventorySimpleResponseWithMenu( inventoryId, menu, quantity, uom );
 
-        return inventorySimpleResponse;
+        return inventorySimpleResponseWithMenu;
     }
 
     @Override
@@ -87,7 +89,7 @@ public class InventoryMapperImpl implements InventoryMapper {
         long inventoryMovementId = 0L;
         int quantityChange = 0;
         InventoryMovementType inventoryMovementType = null;
-        InventorySimpleResponse currentInventoryStock = null;
+        InventorySimpleResponseWithMenu currentInventoryStock = null;
         String createdDate = null;
         UserSimpleResponse createdBy = null;
 
