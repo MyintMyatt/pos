@@ -2,6 +2,7 @@ package com.pos.features.super_admin.user.controller;
 
 import com.pos.common.model.response.ApiResponse;
 import com.pos.features.super_admin.user.model.request.UserRequest;
+import com.pos.features.super_admin.user.model.request.UserUpdateRequest;
 import com.pos.features.super_admin.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -100,7 +101,7 @@ public class UserController {
                     required = true,
                     content = {
                             @Content(schema = @Schema(implementation = String.class)),
-                            @Content(schema = @Schema(implementation = UserRequest.class)),
+                            @Content(schema = @Schema(implementation = UserUpdateRequest.class)),
                     }
             ),
             responses = {
@@ -110,7 +111,7 @@ public class UserController {
     )
     @PreAuthorize("hasRole('UPDATE')")
     @PutMapping("/{user-id}")
-    public ResponseEntity<ApiResponse<?>> updateUser(@PathVariable("user-id") String userId, @RequestBody UserRequest obj) {
+    public ResponseEntity<ApiResponse<?>> updateUser(@PathVariable("user-id") String userId,@Valid @RequestBody UserUpdateRequest obj) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.builder()
                         .status(200)
@@ -133,7 +134,7 @@ public class UserController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "user not found")
             }
     )
-    @PreAuthorize("hasAnyAuthority('UPDATE', 'CREATE')")
+    @PreAuthorize("hasAnyAuthority('UPDATE', 'WRITE')")
     @PutMapping("/is-disabled/{user-id}")
     public ResponseEntity<ApiResponse<?>> disableOrEnableUser(@PathVariable("user-id") String userId) {
         return ResponseEntity.status(200)

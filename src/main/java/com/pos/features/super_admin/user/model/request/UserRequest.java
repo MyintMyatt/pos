@@ -17,7 +17,7 @@ import java.util.Set;
 @ToString
 public class UserRequest {
 
-    private String userId;
+//    private String userId;
 
     @NotBlank(message = "email must not be null or empty")
     @Email(message = "invalid email format")

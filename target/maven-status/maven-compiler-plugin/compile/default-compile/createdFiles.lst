@@ -51,6 +51,7 @@ com\pos\features\super_admin\menu_n_category\model\response\CategoryFullResponse
 com\pos\exception\UserAlreadyExitedException.class
 com\pos\constant\Uom.class
 com\pos\features\cashier\sale\repo\SalesItemRepo.class
+com\pos\features\super_admin\user\model\request\UserUpdateRequest$UserUpdateRequestBuilder.class
 com\pos\features\cashier\sale\util\SaleItemMapperImpl.class
 com\pos\features\super_admin\inventory\model\entity\InventoryMovement$InventoryMovementBuilder.class
 com\pos\features\super_admin\menu_n_category\service\CategoryService.class
@@ -67,6 +68,7 @@ com\pos\features\super_admin\tax\model\response\TaxSimpleResponse.class
 com\pos\features\super_admin\discount\model\entity\MenuItemDiscount.class
 com\pos\features\super_admin\discount\model\request\DiscountRequest$DiscountRequestBuilder.class
 com\pos\features\super_admin\inventory\model\response\InventorySimpleResponseWithMenu.class
+com\pos\features\super_admin\user\model\request\UserUpdateRequest.class
 com\pos\features\cashier\sale\util\SaleMapper.class
 com\pos\features\super_admin\discount\model\request\MenuItemDiscountRequest$MenuItemDiscountRequestBuilder.class
 com\pos\features\super_admin\menu_n_category\model\request\CategoryRequest.class

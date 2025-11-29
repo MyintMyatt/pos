@@ -149,6 +149,8 @@ public class MenuService {
             * */
             InventoryMovement inventoryMovement = InventoryMovement.builder()
                     .quantityChange(request.getQuantity())
+                    .beforeQty(oldQty)
+                    .afterQty(newQty)
                     .inventoryMovementType(InventoryMovementType.RESTOCK)
                     .inventory(existingInv)
                     .createdDate(LocalDateTime.now())

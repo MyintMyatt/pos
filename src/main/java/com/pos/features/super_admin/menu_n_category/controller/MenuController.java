@@ -168,7 +168,7 @@ public class MenuController {
     )
     @PreAuthorize("hasRole('UPDATE')")
     @PutMapping("/{menuId}")
-    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("menuId") String menuId, @Valid @RequestBody MenuRequest obj) {
+    public ResponseEntity<ApiResponse<?>> updateMenu(@PathVariable("menuId") String menuId, @Valid @RequestBody MenuRequest obj) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.builder()
                         .status(200)

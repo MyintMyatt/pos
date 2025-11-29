@@ -5,6 +5,8 @@ import com.pos.exception.UserAlreadyExitedException;
 import com.pos.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -43,5 +45,27 @@ public class GlobalExceptionHandler {
                                 .data(e.getMessage())
                                 .build()
                 );
+    }
+
+    // 🔒 403 Forbidden – user is authenticated but not allowed
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<?>> accessDenied(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.builder()
+                        .status(HttpStatus.FORBIDDEN.value())
+                        .message("Access Denied or You have no permission")
+                        .data(null)
+                        .build());
+    }
+
+    // 🔐 401 Unauthorized – user is not authenticated
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<?>> authenticationException(AuthenticationException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.builder()
+                        .status(HttpStatus.UNAUTHORIZED.value())
+                        .message("Unauthorized")
+                        .data(null)
+                        .build());
     }
 }

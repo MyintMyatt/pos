@@ -7,6 +7,7 @@ import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.model.request.LoginUserRequest;
 import com.pos.features.super_admin.user.model.request.UserRequest;
+import com.pos.features.super_admin.user.model.request.UserUpdateRequest;
 import com.pos.features.super_admin.user.model.response.UserResponse;
 import com.pos.features.super_admin.user.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,10 +124,14 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateUser(String userId, UserRequest obj) {
+    public UserResponse updateUser(String userId, UserUpdateRequest obj) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new NotFoundException("user not found with email " + userId));
-        return convertUserToUserResponse(userRepo.save(convertUserRequestToUser(obj, true)));
+        user.setUserEmail(obj.getUserEmail());
+        user.setUserName(obj.getUserName());
+        user.setPermissions(obj.getPermissions());
+        user.setRole(obj.getRole());
+        return convertUserToUserResponse(userRepo.save(user));
     }
 
     @Transactional

@@ -98,6 +98,7 @@ D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\p
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\user\model\entity\User.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\user\model\request\LoginUserRequest.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\user\model\request\UserRequest.java
+D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\user\model\request\UserUpdateRequest.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\user\model\response\UserResponse.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\user\model\response\UserSimpleResponse.java
 D:\Orion\Projects\Personal\GroupBasedProject\POS\pos-backend\src\main\java\com\pos\features\super_admin\user\repo\UserRepo.java
