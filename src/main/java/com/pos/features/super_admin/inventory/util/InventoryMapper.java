@@ -45,14 +45,14 @@ public interface InventoryMapper {
 
 
     @Mapping(target = "inventoryMovementId", source = "inventoryMovementId")
+    @Mapping(target = "beforeQty", source = "beforeQty")
+    @Mapping(target = "afterQty", source = "afterQty")
     @Mapping(target = "quantityChange", source = "quantityChange")
     @Mapping(target = "inventoryMovementType", source = "inventoryMovementType")
     @Mapping(target = "currentInventoryStock",source = "inventory", qualifiedByName = "toSimpleInvResponse")
     @Mapping(target = "createdDate", source = "createdDate")
     @Mapping(target = "createdBy", qualifiedByName = "toSimpleUserResponse")
     InventoryMovementResponse toFullInvMovementResponse(InventoryMovement inventoryMovement);
-
-
 
 
 }

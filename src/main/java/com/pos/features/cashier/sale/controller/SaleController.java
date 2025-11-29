@@ -42,7 +42,7 @@ public class SaleController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
             }
     )
-    @PreAuthorize("hasRole('CREATE')")
+    @PreAuthorize("hasRole('WRITE')")
     @PostMapping
     public ResponseEntity<?> createSale(@Valid @RequestBody SalesRequest obj){
         return ResponseEntity.status(HttpStatus.CREATED)

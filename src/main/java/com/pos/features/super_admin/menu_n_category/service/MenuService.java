@@ -113,7 +113,6 @@ public class MenuService {
         * @ retrieve existing menu
         * */
         MenuItem existingMenu = getMenuItemById(menuId);
-        System.err.println("existing menu => " + existingMenu);
         existingMenu.setUpdatedBy(currentUser);
         existingMenu.setUpdatedDate(LocalDate.now());
         existingMenu.setMenuName(request.getMenuName().trim());

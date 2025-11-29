@@ -47,7 +47,7 @@ public class MenuController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "internal server error")
             }
     )
-    @PreAuthorize("hasRole('CREATE')")
+    @PreAuthorize("hasRole('WRITE')")
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createMenu(@Valid @RequestBody MenuRequest obj) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -76,7 +76,7 @@ public class MenuController {
 
             }
     )
-    @PreAuthorize("hasRole('CREATE')")
+    @PreAuthorize("hasRole('WRITE')")
     @PostMapping("/image-upload/{menuId}")
     public ResponseEntity<?> uploadMenuImage(@PathVariable(name = "menuId") String menuId, @RequestParam("file") MultipartFile file) {
         java.util.Map map = cloudinaryService.uploadFile(file, menuImageFolderName);

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-28T14:17:11+0630",
+    date = "2025-11-29T13:52:04+0630",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.8 (Oracle Corporation)"
 )
 @Component
@@ -87,6 +87,8 @@ public class InventoryMapperImpl implements InventoryMapper {
         }
 
         long inventoryMovementId = 0L;
+        int beforeQty = 0;
+        int afterQty = 0;
         int quantityChange = 0;
         InventoryMovementType inventoryMovementType = null;
         InventorySimpleResponseWithMenu currentInventoryStock = null;
@@ -95,6 +97,12 @@ public class InventoryMapperImpl implements InventoryMapper {
 
         if ( inventoryMovement.getInventoryMovementId() != null ) {
             inventoryMovementId = inventoryMovement.getInventoryMovementId();
+        }
+        if ( inventoryMovement.getBeforeQty() != null ) {
+            beforeQty = inventoryMovement.getBeforeQty();
+        }
+        if ( inventoryMovement.getAfterQty() != null ) {
+            afterQty = inventoryMovement.getAfterQty();
         }
         if ( inventoryMovement.getQuantityChange() != null ) {
             quantityChange = inventoryMovement.getQuantityChange();
@@ -106,7 +114,7 @@ public class InventoryMapperImpl implements InventoryMapper {
         }
         createdBy = userMapper.toSimpleResponse( inventoryMovement.getCreatedBy() );
 
-        InventoryMovementResponse inventoryMovementResponse = new InventoryMovementResponse( inventoryMovementId, quantityChange, inventoryMovementType, currentInventoryStock, createdDate, createdBy );
+        InventoryMovementResponse inventoryMovementResponse = new InventoryMovementResponse( inventoryMovementId, beforeQty, afterQty, quantityChange, inventoryMovementType, currentInventoryStock, createdDate, createdBy );
 
         return inventoryMovementResponse;
     }

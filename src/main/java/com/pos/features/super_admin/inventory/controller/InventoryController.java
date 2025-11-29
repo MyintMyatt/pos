@@ -37,7 +37,7 @@ public class InventoryController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "internal server error")
             }
     )
-    @PreAuthorize("hasRole('CREATE')")
+    @PreAuthorize("hasRole('WRITE')")
     @PostMapping
     public ResponseEntity<?> controlInventoryMovement(@Valid @RequestBody InventoryMovementRequest request) {
         return ResponseEntity

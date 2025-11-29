@@ -22,6 +22,12 @@ public class InventoryMovement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long inventoryMovementId;
 
+//    @Column(nullable = false)
+    private Integer beforeQty;
+
+//    @Column(nullable = false)
+    private Integer afterQty;
+
     @Column(nullable = false)
     private Integer quantityChange;
 

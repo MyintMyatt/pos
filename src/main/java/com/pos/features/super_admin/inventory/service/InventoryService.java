@@ -33,6 +33,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.pos.constant.InventoryMovementType.*;
+
 @Service
 @NoArgsConstructor
 public class InventoryService {
@@ -105,7 +107,7 @@ public class InventoryService {
          *@ when inventory movement type is SALE or DAMAGE,menu item's inventory must not be null, it must be exited in inventory table
          *
          * */
-        if (req.getMovementType() != InventoryMovementType.RESTOCK && inventory == null)
+        if (req.getMovementType() != RESTOCK && inventory == null)
             throw new NotFoundException("Inventory does not existed for this menu id :" + req.getMenuId());
 
         switch (req.getMovementType()) {
@@ -159,10 +161,16 @@ public class InventoryService {
         inventory.setCreatedBy(currentUser);
         inventory.setCreatedDate(LocalDate.now());
         inventory = inventoryRepository.save(inventory);
+
         /*
          * @ Log for inventory movement
          * */
+        /*
+        * @ set qty current stock due to get before qty ( current qty)
+        * */
+        inventory.setQuantity(currentStock);
         recordForInventoryMovement(inventory, req, currentUser);
+        inventory.setQuantity(currentStock + req.getQuantity());
         return inventory;
     }
 
@@ -185,6 +193,8 @@ public class InventoryService {
     private void recordForInventoryMovement(Inventory inventory, InventoryMovementRequest req, User currentUser) {
         InventoryMovement movement = new InventoryMovement();
         movement.setInventory(inventory);
+        movement.setBeforeQty(inventory.getQuantity());
+        movement.setAfterQty(calculateAfterQty(req.getMovementType(), inventory.getQuantity(), req.getQuantity()));
         movement.setQuantityChange(req.getQuantity());
         movement.setInventoryMovementType(req.getMovementType());
         movement.setCreatedBy(currentUser);
@@ -193,27 +203,46 @@ public class InventoryService {
         movementRepository.save(movement);
     }
 
+    /*
+    * @ we calculate after quantity depend on Inventory movement type
+    * */
+    private int calculateAfterQty(InventoryMovementType movementType, int currentQty, int changeQty) {
+        switch (movementType) {
+            case SALE, DAMAGE -> {
+                return currentQty - changeQty;
+            }
+            case RESTOCK -> {
+                return currentQty + changeQty;
+            }
+        }
+        return -1;
+    }
+
     @Transactional
     public Inventory findInvById(String inventoryId) {
         return inventoryRepository.findById(inventoryId).orElseThrow(() ->
                 new NotFoundException("inventory not found with id : " + inventoryId));
     }
 
+
+    /*
+    * @ this method is used for only menu creation
+    * */
     @Transactional
     public void saveInventoryMovement(String inventoryId, User currentUser) {
-        System.err.println("Inv Id => " + inventoryId);
         Inventory inventory = findInvById(inventoryId);
 
         InventoryMovement inventoryMovement = InventoryMovement.builder()
                 .inventory(inventory)
+                .beforeQty(0)
+                // set currentQty 0 because this method is for only menu creation so there is no inventory qty that mean zero
+                .afterQty(calculateAfterQty(RESTOCK,0,inventory.getQuantity()))
                 .quantityChange(inventory.getQuantity())
-                .inventoryMovementType(InventoryMovementType.RESTOCK)
+                .inventoryMovementType(RESTOCK)
                 .createdDate(LocalDateTime.now())
                 .createdBy(currentUser)
                 .build();
-        System.err.println("Saving inventory movement in NEW transaction.");
         movementRepository.save(inventoryMovement);
-        System.err.println("Inventory movement saved successfully in NEW transaction.");
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
