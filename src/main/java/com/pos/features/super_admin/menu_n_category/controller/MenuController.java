@@ -1,13 +1,10 @@
 package com.pos.features.super_admin.menu_n_category.controller;
 
-import com.cloudinary.Api;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.pos.common.model.response.ApiResponse;
+import com.pos.common.model.response.ResponseView;
 import com.pos.common.service.CloudinaryService;
-import com.pos.constant.InventoryMovementType;
-import com.pos.features.super_admin.menu_n_category.model.request.CategoryUpdateRequest;
-import com.pos.features.super_admin.menu_n_category.model.request.MenuCreateRequest;
-import com.pos.features.super_admin.menu_n_category.model.request.MenuUpdateRequest;
-import com.pos.features.super_admin.menu_n_category.model.response.MenuResponse;
+import com.pos.features.super_admin.menu_n_category.model.request.MenuRequest;
 import com.pos.features.super_admin.menu_n_category.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,13 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/menu")
@@ -47,24 +40,22 @@ public class MenuController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "menu obj request",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = MenuCreateRequest.class))
+                    content = @Content(schema = @Schema(implementation = MenuRequest.class))
             ),
             responses = {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "successfully created menu!!"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "internal server error")
             }
     )
+    @PreAuthorize("hasRole('WRITE')")
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createMenu(@Valid @RequestBody MenuCreateRequest obj){
-        if (obj.getMovementType() != InventoryMovementType.RESTOCK) throw new RuntimeException("Movement Type should be RESTOCK for menu creation");
-        MenuResponse menuResponse = menuService.createMenu(obj);
-
+    public ResponseEntity<ApiResponse<?>> createMenu(@Valid @RequestBody MenuRequest obj) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         ApiResponse.builder()
                                 .status(201)
                                 .message("successfully created menu!!")
-                                .data(menuResponse).build()
+                                .data(menuService.createMenu(obj)).build()
                 );
     }
 
@@ -85,14 +76,19 @@ public class MenuController {
 
             }
     )
+    @PreAuthorize("hasRole('WRITE')")
     @PostMapping("/image-upload/{menuId}")
-    public ResponseEntity<?> uploadMenuImage(@PathVariable(name = "menuId") String menuId, @RequestParam("file") MultipartFile file){
-
+    public ResponseEntity<?> uploadMenuImage(@PathVariable(name = "menuId") String menuId, @RequestParam("file") MultipartFile file) {
         java.util.Map map = cloudinaryService.uploadFile(file, menuImageFolderName);
-        System.err.println("image data => " + map.get("url"));
+        System.err.println("call");
         menuService.updateMenuImage(menuId, map.get("url").toString());
         return ResponseEntity.status(HttpStatus.OK)
-                .body(map);
+                .body(ApiResponse.builder()
+                        .status(200)
+                        .message("successfully uploaded image")
+                        .data(map.get("url"))
+                        .build()
+                );
     }
 
 
@@ -106,10 +102,11 @@ public class MenuController {
                     @Parameter(name = "categoryId", description = "Filter by category ID", required = false)
             },
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "all registered menu list"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "all registered menu list"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "internal server error")
             }
     )
+    @PreAuthorize("hasRole('READ')")
     @GetMapping
     public ResponseEntity<ApiResponse<?>> getAllMenu(
             @RequestParam(defaultValue = "0") int page,
@@ -136,10 +133,11 @@ public class MenuController {
                     content = @Content(schema = @Schema(implementation = String.class))
             ),
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "menu that equals by id"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "menu not found")
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "menu that equals by id"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "menu not found")
             }
     )
+    @PreAuthorize("hasRole('READ')")
     @GetMapping("/{menuId}")
     public ResponseEntity<ApiResponse<Object>> getCategoryById(@PathVariable("menuId") String menuId) {
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -160,17 +158,17 @@ public class MenuController {
                     required = true,
                     content = {
                             @Content(schema = @Schema(implementation = String.class)),
-                            @Content(schema = @Schema(implementation = MenuUpdateRequest.class)),
+                            @Content(schema = @Schema(implementation = MenuRequest.class)),
                     }
             ),
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "successfully updated menu!!"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500",description = "internal server error")
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "successfully updated menu!!"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "internal server error")
             }
     )
-
+    @PreAuthorize("hasRole('UPDATE')")
     @PutMapping("/{menuId}")
-    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("menuId") String menuId,@Valid @RequestBody MenuUpdateRequest obj) {
+    public ResponseEntity<ApiResponse<?>> updateCategory(@PathVariable("menuId") String menuId, @Valid @RequestBody MenuRequest obj) {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.builder()
                         .status(200)
@@ -190,10 +188,11 @@ public class MenuController {
                     content = @Content(schema = @Schema(implementation = String.class))
             ),
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",description = "successfully deleted menu"),
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",description = "menu not found")
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "successfully deleted menu"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "menu not found")
             }
     )
+    @PreAuthorize("hasRole('DELETE')")
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResponse<?>> deleteMenu(@PathVariable("menuId") String menuId) {
         menuService.deleteMenu(menuId);

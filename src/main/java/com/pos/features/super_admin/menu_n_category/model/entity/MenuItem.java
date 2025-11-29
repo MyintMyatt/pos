@@ -1,5 +1,6 @@
 package com.pos.features.super_admin.menu_n_category.model.entity;
 
+import com.pos.features.super_admin.discount.model.entity.MenuItemDiscount;
 import com.pos.features.super_admin.inventory.model.entity.Inventory;
 import com.pos.features.super_admin.user.model.entity.User;
 import jakarta.persistence.*;
@@ -8,10 +9,12 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "tbl_menu_item")
-@Data
+@Getter
+@Setter
 @ToString
 @Builder
 @NoArgsConstructor
@@ -19,11 +22,11 @@ import java.time.LocalDate;
 public class MenuItem implements Serializable {
 
     @Id
-    @GeneratedValue(generator = "menu-id-generator")
-    @GenericGenerator(
-            name = "menu-id-generator",
-            strategy = "com.pos.features.super_admin.menu_n_category.util.MenuItemGenerator"
-    )
+//    @GeneratedValue(generator = "menu-id-generator")
+//    @GenericGenerator(
+//            name = "menu-id-generator",
+//            strategy = "com.pos.features.super_admin.menu_n_category.util.MenuItemGenerator"
+//    )
     @Column(name = "menu_id", length = 12)
     private String menuId;
 
@@ -34,13 +37,16 @@ public class MenuItem implements Serializable {
     private Double price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fk_category_id", referencedColumnName = "category_id")
+    @JoinColumn(name = "fk_category_id", referencedColumnName = "category_id", nullable = false)
     private Category category;
 
     private String menuImageUrl;
 
-//    @OneToOne(mappedBy = "menuItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private Inventory inventory;
+    @OneToOne(mappedBy = "menuItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Inventory inventory;
+
+    @OneToMany(mappedBy = "menuItem", orphanRemoval = false, fetch = FetchType.LAZY)
+    private List<MenuItemDiscount> menuItemDiscounts;
 
     @Column(nullable = false)
     private boolean isThereDiscount;

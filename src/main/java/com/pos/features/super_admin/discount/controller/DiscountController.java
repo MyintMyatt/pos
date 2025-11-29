@@ -34,7 +34,7 @@ public class DiscountController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> createDis(@Valid @RequestBody DiscountRequest obj) {
+    public ResponseEntity<?> createDiscount(@Valid @RequestBody DiscountRequest obj) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         ApiResponse.builder()

@@ -1,21 +1,27 @@
 package com.pos.features.super_admin.menu_n_category.service;
 
 import com.pos.common.model.response.PageDTO;
+import com.pos.common.service.SecurityService;
+import com.pos.constant.InventoryMovementType;
 import com.pos.exception.NotFoundException;
-import com.pos.features.super_admin.discount.model.entity.MenuItemDiscount;
-import com.pos.features.super_admin.discount.model.response.MenuItemDiscountResponse;
 import com.pos.features.super_admin.discount.repo.MenuItemDiscountRepository;
 import com.pos.features.super_admin.inventory.model.entity.Inventory;
-import com.pos.features.super_admin.inventory.model.request.InventoryMovementRequest;
+import com.pos.features.super_admin.inventory.model.entity.InventoryMovement;
+import com.pos.features.super_admin.inventory.repo.InventoryMovementRepository;
 import com.pos.features.super_admin.inventory.service.InventoryService;
 import com.pos.features.super_admin.menu_n_category.model.entity.Category;
 import com.pos.features.super_admin.menu_n_category.model.entity.MenuItem;
-import com.pos.features.super_admin.menu_n_category.model.request.MenuCreateRequest;
-import com.pos.features.super_admin.menu_n_category.model.request.MenuUpdateRequest;
+import com.pos.features.super_admin.menu_n_category.model.request.MenuRequest;
 import com.pos.features.super_admin.menu_n_category.model.response.MenuResponse;
 import com.pos.features.super_admin.menu_n_category.repo.MenuRepo;
+import com.pos.features.super_admin.menu_n_category.util.MenuItemGenerator;
+import com.pos.features.super_admin.menu_n_category.util.MenuMapper;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,11 +29,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class MenuService {
@@ -37,102 +44,165 @@ public class MenuService {
     private UserService userService;
     private InventoryService inventoryService;
     private MenuItemDiscountRepository menuItemDiscountRepository;
+    private MenuMapper menuMapper;
+    private SecurityService securityService;
+    private InventoryMovementRepository inventoryMovementRepository;
+//    private MenuItemGenerator menuItemGenerator;
 
     @Autowired
-    public MenuService(MenuRepo menuRepo, CategoryService categoryService, UserService userService, InventoryService inventoryService, MenuItemDiscountRepository menuItemDiscountRepository) {
+    public MenuService( InventoryMovementRepository inventoryMovementRepository, SecurityService securityService,MenuRepo menuRepo, CategoryService categoryService, UserService userService, InventoryService inventoryService, MenuItemDiscountRepository menuItemDiscountRepository, MenuMapper menuMapper) {
+        this.inventoryMovementRepository = inventoryMovementRepository;
+        this.securityService = securityService;
         this.menuRepo = menuRepo;
         this.categoryService = categoryService;
         this.userService = userService;
         this.inventoryService = inventoryService;
         this.menuItemDiscountRepository = menuItemDiscountRepository;
+        this.menuMapper = menuMapper;
+//        this.menuItemGenerator = menuItemGenerator;
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
-    public MenuResponse createMenu(MenuCreateRequest obj) {
-        Category c = categoryService.getCategoryObjById(obj.getCategoryId());
-        User u = userService.getUser(obj.getCreatedBy());
-        MenuItem menuItem = menuRepo.save(convertCreateReqToMenu(obj, c, u));
+    public MenuResponse createMenu(MenuRequest request) {
+        // check category and user that are invalid or not
+        Category category = categoryService.getCategoryObjById(request.getCategoryId());
+        User currentUser = userService.getUser(securityService.getCurrentLoginUserId());
 
-        // add stock
-        inventoryService.inventoryMovementTypeCheck(
-                InventoryMovementRequest.builder()
-                        .menuId(menuItem.getMenuId())
-                        .movementType(obj.getMovementType())
-                        .quantity(obj.getQuantity())
-                        .uom(obj.getUom())
-                        .createdBy(u.getUserName())
-                        .build(), null, u, menuItem
-        );
+        /*
+        * @generate menu id
+        */
+        String menuId = generateNextMenuId();
 
-        MenuResponse menuResponse =  convertObjToRes(menuItem);
-        return menuResponse;
+
+        MenuItem menuItem = menuMapper.toEntity(request);
+        menuItem.setMenuId(menuId);
+        menuItem.setCategory(category);
+        menuItem.setCreatedBy(currentUser);
+        menuItem.setUpdatedBy(null);
+        menuItem.setUpdatedDate(null);
+
+        /*
+        * @ generate inventory id manually
+        * @ set inventory's properties
+        */
+        String inventoryId = inventoryService.generateNextInvId();
+        Inventory inventory = menuItem.getInventory();
+        inventory.setInventoryId(inventoryId);
+        inventory.setMenuItem(menuItem);
+        inventory.setCreatedBy(currentUser);
+
+        menuItem.setInventory(inventory);
+
+        /*
+        * @ persist menu and inventory (cascade)
+        */
+        MenuItem savedResult = menuRepo.save(menuItem);
+        //        entityManager.flush(); // Force all pending INSERTS (menu and inventory) to run NOW
+        inventoryService.saveInventoryMovement(inventoryId,currentUser);
+
+        return  menuMapper.toFullResponse(savedResult);
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
-    public MenuResponse updateMenu(String menuId, MenuUpdateRequest obj) {
-        User updatedBy = userService.getUser(obj.getCategoryId());
+    public MenuResponse updateMenu(String menuId, MenuRequest request) {
+
+        User currentUser = userService.getUser(securityService.getCurrentLoginUserId());
+        /*
+        * @ retrieve existing menu
+        * */
         MenuItem existingMenu = getMenuItemById(menuId);
-        Category category;
+        existingMenu.setUpdatedBy(currentUser);
+        existingMenu.setUpdatedDate(LocalDate.now());
+        existingMenu.setMenuName(request.getMenuName().trim());
+        existingMenu.setPrice(request.getPrice());
+        existingMenu.setDescription(request.getDescription());
 
-        // if update category, we need to update this
-        if (existingMenu.getCategory().getCategoryId() != obj.getCategoryId()) {
-            category = categoryService.getCategoryObjById(obj.getCategoryId());
-            existingMenu.setCategory(category);
+        /*
+        *  @ for category
+        * */
+        if (!existingMenu.getCategory().getCategoryId().trim().equals(request.getCategoryId())) {
+            Category newCategory = categoryService.getCategoryObjById(request.getCategoryId());
+            existingMenu.setCategory(newCategory);
         }
-        return convertObjToRes(menuRepo.save(convertUpdateReqToMenu(obj, existingMenu, updatedBy)));
+
+        /*
+        * @ for inventory
+        * @ this function is for if user add new quantity,
+        * */
+        if (request.getQuantity() > 0) {
+            Inventory existingInv = existingMenu.getInventory();
+            // add stock
+            int oldQty = existingInv.getQuantity();
+            int newQty = oldQty + request.getQuantity();
+
+            existingInv.setQuantity(newQty);
+            existingInv.setUom(request.getUom());
+            existingMenu.setUpdatedBy(currentUser);
+            existingMenu.setUpdatedDate(LocalDate.now());
+
+            existingMenu.setInventory(existingInv);
+
+            /*
+            * @ for inventory movement
+            * */
+            InventoryMovement inventoryMovement = InventoryMovement.builder()
+                    .quantityChange(request.getQuantity())
+                    .inventoryMovementType(InventoryMovementType.RESTOCK)
+                    .inventory(existingInv)
+                    .createdDate(LocalDateTime.now())
+                    .createdBy(currentUser)
+                    .build();
+
+            /*
+            * @ save inventory movement obj
+            * */
+            inventoryMovementRepository.save(inventoryMovement);
+        }
+
+        return menuMapper.toFullResponse(menuRepo.save(existingMenu));
     }
 
     @Transactional
     public MenuItem getMenuItemById(String menuId) {
 
         MenuItem menuItem = menuRepo.findById(menuId).orElseThrow(
-                () -> new NotFoundException("menu not found with id " + menuId)
+                () -> new NotFoundException("menu not found with id : " + menuId)
         );
-        if (menuItem.isDeleted()) throw new NotFoundException("menu not found with id " + menuId);
+        if (menuItem.isDeleted()) throw new NotFoundException("menu not found with id :" + menuId);
         return menuItem;
     }
 
     @Transactional
     public MenuResponse getMenuResponseById(String menuId) {
-        return convertObjToRes(getMenuItemById(menuId));
+        return menuMapper.toFullResponse(getMenuItemById(menuId));
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
     public void deleteMenu(String menuId) {
+        String currentLoginUserId = securityService.getCurrentLoginUserId();
+        User currentUser = userService.getUser(currentLoginUserId);
+
         MenuItem menu = getMenuItemById(menuId);
+        menu.setDeleted(true);
+        menu.setUpdatedDate(LocalDate.now());
+        menu.setUpdatedBy(currentUser);
         menuRepo.save(menu);
     }
 
-    @CacheEvict(value = "menuCache", allEntries = true)
+    @CacheEvict(value = {"InvMovement","menuCache","salesCache"}, allEntries = true)
     @Transactional
     public MenuResponse updateMenuImage(String menuId, String imageUrl) {
         MenuItem menuItem = getMenuItemById(menuId);
         menuItem.setMenuImageUrl(imageUrl);
-        return convertObjToRes(menuRepo.save(menuItem));
+        return menuMapper.toFullResponse(menuRepo.save(menuItem));
     }
 
-    //    @Transactional
-//    public List<MenuResponse> getAllMenu() {
-//        return menuRepo.findAll()
-//                .stream().filter(m -> !m.isDeleted())
-//                .map(this::convertObjToRes)
-//                .toList();
-//    }
     @Cacheable(value = "menuCache", key = "#page + '-' + #size + '-' + (#keyword != null ? #keyword : '') + '-' + (#categoryId != null ? #categoryId : '')")
     @Transactional
     public PageDTO<MenuResponse> getAllMenu(int page, int size, String keyword, String categoryId) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<MenuItem> menuPage = menuRepo.searchMenu(
-//                (keyword != null && !keyword.isBlank()) ? keyword : null,
-//                (categoryId != null && !categoryId.isBlank()) ? categoryId : null,
-//                pageable
-//        );
-//        System.err.println("menu page => " + menuPage);
-//
-//        return menuPage.map(this::convertObjToRes);
         Pageable pageable = PageRequest.of(page, size);
         Page<MenuItem> menuPage = menuRepo.searchMenu(
                 (keyword != null && !keyword.isBlank()) ? keyword : null,
@@ -140,83 +210,65 @@ public class MenuService {
                 pageable
         );
 
-        List<MenuResponse> content = menuPage.stream().map(this::convertObjToRes).toList();
+        List<MenuResponse> content = menuPage.stream().map(menuMapper::toFullResponse).toList();
         return new PageDTO<>(content, page, size, menuPage.getTotalElements(), menuPage.getTotalPages());
     }
 
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    private MenuItem convertCreateReqToMenu(MenuCreateRequest obj, Category category, User user) {
-        return MenuItem.builder()
-                .menuName(obj.getMenuName())
-                .price(obj.getPrice())
-                .category(category)
-                .isThereDiscount(false)
-                .description(obj.getDescription())
-                .createdDate(LocalDate.now())
-                .createdBy(user)
-                .isDeleted(false)
-                .build();
-    }
+    // Use REQUIRES_NEW to ensure a separate, clean transaction for the ID lookup
+    // Use 'synchronized' to prevent race conditions during ID generation
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public synchronized String generateNextMenuId() {
+        String lastId = null;
 
-    private MenuItem convertUpdateReqToMenu(MenuUpdateRequest obj, MenuItem existing, User updatedBy) {
-        return MenuItem.builder()
-                .menuName(obj.getMenuName())
-                .price(obj.getPrice())
-                .category(existing.getCategory())
-                .isThereDiscount(false)
-                .description(obj.getDescription())
-                .createdDate(existing.getCreatedDate())
-                .createdBy(existing.getCreatedBy())
-                .updatedBy(updatedBy)
-                .updatedDate(LocalDate.now())
-                .isDeleted(false)
-                .build();
-    }
+        try {
+            // Native SQL query to select the maximum menu_id
+            // Adjust the table and column names to match your schema exactly
+            String sql = "SELECT menu_id FROM tbl_menu_item ORDER BY menu_id DESC LIMIT 1";
+            Query query = entityManager.createNativeQuery(sql);
 
-    public MenuResponse convertObjToRes(MenuItem obj) {
-        Inventory inventory = inventoryService.getInventoryByMenuId(obj.getMenuId());
-        return new MenuResponse(
-                obj.getMenuId(),
-                obj.getMenuName(),
-                obj.getPrice(),
-                categoryService.convertCategoryToRes(obj.getCategory()),
-                obj.getMenuImageUrl(),
-                obj.isThereDiscount(),
-                obj.getDescription(),
-                userService.convertUserToUserResponse(obj.getCreatedBy()),
-                obj.getCreatedDate().toString(),
-                obj.getUpdatedBy() != null ? userService.convertUserToUserResponse(obj.getUpdatedBy()) : null,
-                obj.getUpdatedDate() != null ? obj.getUpdatedDate().toString() : null,
-                inventoryService.convertObjToInvCustomRes(inventory),
-                getDiscountsForMenu(obj)
-        );
-    }
+            // Get the single result from the query
+            lastId = (String) query.getSingleResult();
 
-    @Transactional
-    private List<MenuItemDiscountResponse> getDiscountsForMenu(MenuItem menuItem) {
-        List<MenuItemDiscount> discounts = menuItemDiscountRepository.findByMenuItem_MenuId(menuItem.getMenuId());
+        } catch (NoResultException e) {
+            // Handle the case where the table is empty
+            lastId = null;
+        } catch (Exception e) {
+            // Handle other potential database errors
+            e.printStackTrace();
+            throw new RuntimeException("Error generating next menu ID", e);
+        }
+        LocalDate now = LocalDate.now();
+        String year = String.format("%02d", now.getYear() % 100);
+        String month = String.format("%02d", now.getMonthValue());
 
-        return discounts.stream()
-                .filter(mid -> {
-                    // Only valid discounts
-                    var dis = mid.getDiscount();
-                    return !dis.isDeleted()
-                            && LocalDate.now().isAfter(dis.getValidFrom().minusDays(1))
-                            && LocalDate.now().isBefore(dis.getValidTo().plusDays(1));
-                })
-                .map(mid -> MenuItemDiscountResponse.builder()
-                        .id(mid.getId())
-                        .menuId(menuItem.getMenuId())
-                        .menuName(menuItem.getMenuName())
-                        .discountId(mid.getDiscount().getDiscountId())
-                        .discountValue(mid.getDiscount().getDiscountValue())
-                        .discountType(mid.getDiscount().getDiscountType().name())
-                        .validFrom(mid.getDiscount().getValidFrom())
-                        .validTo(mid.getDiscount().getValidTo())
-                        .createdDate(mid.getCreatedDate())
-                        .createdBy(mid.getCreatedBy().getUserName()) // or getUsername()
-                        .build())
-                .toList();
+        int nextNumber = 1;
+        if (lastId != null && lastId.length() >= 9) {
+            String numberPart = lastId.substring(5);
+            try {
+                nextNumber = Integer.parseInt(numberPart) + 1;
+            } catch (NumberFormatException e) {
+                nextNumber = 1;
+            }
+        }
+        return "M" + year + month + String.format("%05d", nextNumber);
+
+//        // Implement your specific ID increment logic here
+//        if (lastId == null || lastId.isEmpty()) {
+//            return "MID10001"; // Starting ID
+//        }
+//
+//        // Example logic to increment the numeric part (adjust to your exact format)
+//        try {
+//            String prefix = lastId.substring(0, 3); // e.g., "MID"
+//            int number = Integer.parseInt(lastId.substring(3));
+//            number++;
+//            return prefix + number;
+//        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+//            throw new RuntimeException("Invalid last menu ID format found in database: " + lastId, e);
+//        }
     }
 
 }

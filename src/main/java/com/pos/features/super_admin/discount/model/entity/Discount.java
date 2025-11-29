@@ -58,5 +58,4 @@ public class Discount {
     @JoinColumn(name = "updated_by", referencedColumnName = "user_id",nullable = true)
     private User updatedBy;
 
-
 }

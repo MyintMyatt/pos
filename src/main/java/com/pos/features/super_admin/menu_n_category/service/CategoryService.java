@@ -1,11 +1,12 @@
 package com.pos.features.super_admin.menu_n_category.service;
 
+import com.pos.common.service.SecurityService;
 import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.menu_n_category.model.entity.Category;
-import com.pos.features.super_admin.menu_n_category.model.request.CategoryCreateRequest;
-import com.pos.features.super_admin.menu_n_category.model.request.CategoryUpdateRequest;
-import com.pos.features.super_admin.menu_n_category.model.response.CategoryResponse;
+import com.pos.features.super_admin.menu_n_category.model.request.CategoryRequest;
+import com.pos.features.super_admin.menu_n_category.model.response.CategoryFullResponse;
 import com.pos.features.super_admin.menu_n_category.repo.CategoryRepo;
+import com.pos.features.super_admin.menu_n_category.util.CategoryMapper;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +25,41 @@ public class CategoryService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CategoryMapper categoryMapper;
+
+    @Autowired
+    private SecurityService securityService;
+
     @Transactional
-    public CategoryResponse createCategory(CategoryCreateRequest request) {
-        return convertCategoryToRes(
+    public CategoryFullResponse createCategory(CategoryRequest request) {
+        return categoryMapper.toFullResponse(
                 categoryRepo.save(
                         convertReqToCreateCategory(request)
                 ));
     }
 
     @Transactional
-    public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest obj) {
-        Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id : " + obj.getCategoryId()));
-        obj.setCategoryId(categoryId);
-        return convertCategoryToRes(categoryRepo.save(convertReqToUpdateCategory(obj)));
+    public CategoryFullResponse updateCategory(String categoryId, CategoryRequest obj) {
+        Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id : " + categoryId));
+
+        /*
+         * @ get current login user
+         * */
+        String currentLoginUser = securityService.getCurrentLoginUserId();
+        User currentUser = userService.getUser(currentLoginUser);
+
+        category.setCategoryName(obj.getCategoryName());
+        category.setUpdatedBy(currentUser);
+        category.setUpdatedDate(LocalDate.now());
+
+        return categoryMapper.toFullResponse(categoryRepo.save(category));
     }
 
     @Transactional
-    public CategoryResponse getCategoryById(String categoryId) {
+    public CategoryFullResponse getCategoryById(String categoryId) {
         Category c = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("category not found with id " + categoryId));
-        return convertCategoryToRes(c);
+        return categoryMapper.toFullResponse(c);
     }
 
     @Transactional
@@ -52,10 +69,10 @@ public class CategoryService {
     }
 
     @Transactional
-    public List<CategoryResponse> getAllCat() {
+    public List<CategoryFullResponse> getAllCat() {
         return categoryRepo.findAll().stream()
                 .filter(c -> !c.isDeleted())
-                .map(this::convertCategoryToRes)
+                .map(categoryMapper::toFullResponse)
                 .toList();
     }
 
@@ -66,23 +83,14 @@ public class CategoryService {
         categoryRepo.save(category);
     }
 
-    private Category convertReqToUpdateCategory(CategoryUpdateRequest obj) {
-        com.pos.features.super_admin.menu_n_category.model.entity.Category category = categoryRepo.findById(obj.getCategoryId()).orElseThrow(() -> new NotFoundException("category not found with id : " + obj.getCategoryId()));
-        User updatedUser = userService.getUser(obj.getActionBy());
-        return Category
-                .builder()
-                .categoryId(obj.getCategoryId())
-                .categoryName(obj.getCategoryName())
-                .createdDate(category.getCreatedDate())
-                .createdBy(category.getCreatedBy())
-                .updatedBy(updatedUser)
-                .updatedDate(LocalDate.now())
-                .isDeleted(false)
-                .build();
-    }
 
-    private Category convertReqToCreateCategory(CategoryCreateRequest obj) {
-        User user = userService.getUser(obj.getActionBy());
+    private Category convertReqToCreateCategory(CategoryRequest obj) {
+        /*
+        * @ get current login user
+        * */
+        String currentLoginUser = securityService.getCurrentLoginUserId();
+        User user = userService.getUser(currentLoginUser);
+
         return Category
                 .builder()
                 .categoryName(obj.getCategoryName())
@@ -91,16 +99,6 @@ public class CategoryService {
                 .build();
     }
 
-    public CategoryResponse convertCategoryToRes(Category category) {
-        User createdBy = userService.getUser(category.getCreatedBy().getUserId());
-        return new CategoryResponse(
-                category.getCategoryId(),
-                category.getCategoryName(),
-                category.getCreatedDate().toString(),
-                userService.convertUserToUserResponse(createdBy), // ✅ DTO
-                category.getUpdatedDate() != null ? category.getUpdatedDate().toString() : null,
-                category.getUpdatedBy() != null ? userService.convertUserToUserResponse(category.getUpdatedBy()) : null
-        );
-    }
+
 
 }

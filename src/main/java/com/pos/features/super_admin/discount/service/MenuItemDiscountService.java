@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -131,16 +130,16 @@ public class MenuItemDiscountService {
 
     private MenuItemDiscountResponse convertToResponse(MenuItemDiscount obj) {
         return MenuItemDiscountResponse.builder()
-                .id(obj.getId())
-                .menuId(obj.getMenuItem().getMenuId())
-                .menuName(obj.getMenuItem().getMenuName())
+//                .id(obj.getId())
+//                .menuId(obj.getMenuItem().getMenuId())
+//                .menuName(obj.getMenuItem().getMenuName())
                 .discountId(obj.getDiscount().getDiscountId())
                 .discountType(obj.getDiscount().getDiscountType().name())
                 .discountValue(obj.getDiscount().getDiscountValue())
                 .validFrom(obj.getDiscount().getValidFrom())
                 .validTo(obj.getDiscount().getValidTo())
-                .createdDate(obj.getCreatedDate())
-                .createdBy(obj.getCreatedBy().getUserName())
+//                .createdDate(obj.getCreatedDate())
+//                .createdBy(obj.getCreatedBy().getUserName())
                 .build();
     }
 }

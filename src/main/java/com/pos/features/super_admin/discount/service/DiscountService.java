@@ -1,12 +1,15 @@
 package com.pos.features.super_admin.discount.service;
 
+import com.pos.common.service.SecurityService;
 import com.pos.exception.NotFoundException;
 import com.pos.features.super_admin.discount.model.entity.Discount;
 import com.pos.features.super_admin.discount.model.request.DiscountRequest;
 import com.pos.features.super_admin.discount.model.response.DiscountResponse;
 import com.pos.features.super_admin.discount.repo.DiscountRepo;
+import com.pos.features.super_admin.discount.util.DiscountMapper;
 import com.pos.features.super_admin.user.model.entity.User;
 import com.pos.features.super_admin.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,25 +19,58 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class DiscountService {
 
-    @Autowired
-    private DiscountRepo discountRepo;
+    private final DiscountRepo discountRepo;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    private final DiscountMapper discountMapper;
+
+    private final SecurityService securityService;
 
     @Transactional
     public DiscountResponse createDiscount(DiscountRequest req){
-       Discount dis =  discountRepo.save(convertDisRequestToDiscount(req, false));
-       return convertDiscountToDisResponse(dis);
+        /*
+        * @ check valid to date is valid or not
+        * */
+        if (req.getValidTo().isBefore(LocalDate.now()) || req.getValidTo().isBefore(req.getValidFrom()))
+            throw new RuntimeException("Invalid valid to date");
+        /*
+        *  @ get current login user
+        * */
+        String currentLoginUserId = securityService.getCurrentLoginUserId();
+        User currentLoginUser = userService.getUser(currentLoginUserId);
+
+        Discount discount = discountMapper.toEntity(req);
+        discount.setCreatedBy(currentLoginUser);
+
+        return discountMapper.toResponse(discountRepo.save(discount));
     }
 
     @Transactional
     public DiscountResponse updateDiscount(String disId, DiscountRequest req){
-        if (getDiscount(disId) == null)
-            throw new NotFoundException("Discount not found with id " + disId);
-        return convertDiscountToDisResponse(discountRepo.save(convertDisRequestToDiscount(req, true)));
+        /*
+         * @ check valid to date is valid or not
+         * */
+        if (req.getValidTo().isBefore(LocalDate.now()) || req.getValidTo().isBefore(req.getValidFrom()))
+            throw new RuntimeException("Invalid valid to date");
+        /*
+         *  @ get current login user
+         * */
+        String currentLoginUserId = securityService.getCurrentLoginUserId();
+        User currentLoginUser = userService.getUser(currentLoginUserId);
+
+        Discount existingDiscount = getDiscount(disId);
+        existingDiscount.setUpdatedBy(currentLoginUser);
+        existingDiscount.setUpdatedDate(LocalDate.now());
+        existingDiscount.setDiscountType(req.getDiscountType());
+        existingDiscount.setDiscountValue(req.getDiscountValue());
+        existingDiscount.setValidFrom(req.getValidFrom());
+        existingDiscount.setValidTo(req.getValidTo());
+
+        return discountMapper.toResponse(discountRepo.save(existingDiscount));
     }
 
     @Transactional
@@ -47,7 +83,7 @@ public class DiscountService {
         return discountRepo.findAll()
                 .stream()
                 .filter(d -> !d.isDeleted())
-                .map(this::convertDiscountToDisResponse)
+                .map(discountMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -59,32 +95,6 @@ public class DiscountService {
         discountRepo.save(dis);
     }
 
-    private DiscountResponse convertDiscountToDisResponse(Discount obj) {
-        return DiscountResponse.builder()
-                .discountId(obj.getDiscountId())
-                .discountType(obj.getDiscountType())
-                .discountValue(obj.getDiscountValue())
-                .validFrom(obj.getValidFrom())
-                .validTo(obj.getValidTo())
-                .createdDate(obj.getCreatedDate())
-                .createdBy(obj.getCreatedBy())
-                .updatedDate(obj.getUpdatedDate())
-                .updatedBy(obj.getUpdatedBy())
-                .build();
-    }
 
-    private Discount convertDisRequestToDiscount(DiscountRequest obj, boolean isUpdated) {
-        User user = userService.getUser(obj.getUserId());
-        return Discount.builder()
-                .discountType(obj.getDiscountType())
-                .discountValue(obj.getDiscountValue() > 0 ? obj.getDiscountValue() : 0)
-                .validFrom(obj.getValidFrom())
-                .validTo(obj.getValidTo())
-                .isDeleted(false)
-                .createdDate(LocalDate.now())
-                .createdBy(user)
-                .updatedDate( isUpdated ? LocalDate.now() : null)
-                .updatedBy(isUpdated ? user : null)
-                .build();
-    }
+
 }

@@ -22,6 +22,12 @@ public class InventoryMovement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long inventoryMovementId;
 
+//    @Column(nullable = false)
+    private Integer beforeQty;
+
+//    @Column(nullable = false)
+    private Integer afterQty;
+
     @Column(nullable = false)
     private Integer quantityChange;
 
@@ -38,6 +44,5 @@ public class InventoryMovement {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
     private User createdBy;
-
-
+    
 }
